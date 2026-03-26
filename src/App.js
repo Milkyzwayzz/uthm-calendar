@@ -5,8 +5,8 @@ import interactionPlugin from '@fullcalendar/interaction';
 import { uthmEvents } from './calendarData';
 import { 
   FaSun, FaMoon, FaPlus, FaList, FaCalendarAlt, FaFilter, 
-  FaSearch, FaBell, FaCog, FaQuestionCircle, FaCheckCircle,
-  FaTimesCircle, FaEdit, FaTrash, FaSave, FaExclamationTriangle
+  FaSearch, FaCog, FaQuestionCircle, FaCheckCircle,
+  FaTrash, FaSave, FaExclamationTriangle
 } from 'react-icons/fa';
 import './App.css';
 
