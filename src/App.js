@@ -15,6 +15,8 @@ const App = () => {
 
   const isJohorWeekend = (day) => day === 5 || day === 6;
 
+  const toggleTheme = () => setTheme(theme === 'dark' ? 'light' : 'dark');
+
   const handleWhatsAppShare = () => {
     const message = "Check out UTHM Academic Calendar 📅✨";
     const url = window.location.href;
@@ -28,7 +30,7 @@ const App = () => {
     setFeedbackModal(false);
   };
 
-  // ✅ GLOBAL FILTER (SYNCED)
+  // Filter events by category
   const filteredEvents = uthmEvents.filter(ev =>
     activeFilter === 'all' || ev.extendedProps.category === activeFilter
   );
@@ -48,7 +50,6 @@ const App = () => {
       const dateObj = new Date(year, month, d);
       const dateStr = dateObj.toISOString().split('T')[0];
 
-      // ✅ USE FILTERED EVENTS
       const events = filteredEvents.filter(e =>
         dateStr >= e.start && dateStr <= (e.end || e.start)
       );
@@ -56,13 +57,11 @@ const App = () => {
       tiles.push(
         <div key={d} className={`tile ${isJohorWeekend(dateObj.getDay()) ? 'weekend' : ''}`}>
           <span className="day-num">{d}</span>
-
           <div className="dots">
             {events.map((ev, i) => (
               <span key={i} className={`dot ${ev.extendedProps.category}`} />
             ))}
           </div>
-
           {events.length > 0 && (
             <div className="tooltip">
               {events.map((ev, i) => (
@@ -78,9 +77,7 @@ const App = () => {
 
     return (
       <div className="month-card" key={`${month}-${year}`}>
-        <h3>
-          {new Date(year, month).toLocaleString('ms-MY', { month: 'long' })} {year}
-        </h3>
+        <h3>{new Date(year, month).toLocaleString('ms-MY', { month: 'long' })} {year}</h3>
         <div className="days-grid">{tiles}</div>
       </div>
     );
@@ -90,20 +87,27 @@ const App = () => {
     <div className={`app-${theme}`}>
       <div className="animated-bg"></div>
 
-      {/* TOP BAR */}
-      <div className="top-bar">
-        <button onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}>
+      {/* THEME TOGGLE TOP LEFT */}
+      <div className="top-left-toggle">
+        <button className="theme-toggle" onClick={toggleTheme}>
           {theme === 'dark' ? '☀ Light' : '🌙 Dark'}
         </button>
+      </div>
 
-        <div className="view-toggle">
-          <button onClick={() => setViewMode('calendar')} className={viewMode === 'calendar' ? 'active' : ''}>
-            Calendar
-          </button>
-          <button onClick={() => setViewMode('list')} className={viewMode === 'list' ? 'active' : ''}>
-            List
-          </button>
-        </div>
+      {/* CALENDAR / LIST TOGGLE TOP RIGHT */}
+      <div className="top-right-toggle">
+        <button
+          className={viewMode === 'calendar' ? 'active' : ''}
+          onClick={() => setViewMode('calendar')}
+        >
+          📅 Calendar
+        </button>
+        <button
+          className={viewMode === 'list' ? 'active' : ''}
+          onClick={() => setViewMode('list')}
+        >
+          📋 List
+        </button>
       </div>
 
       {/* HERO */}
@@ -111,12 +115,14 @@ const App = () => {
         <div className="year-pill">2025 / 2026</div>
         <h1>Bila <span>UTHM</span> Cuti?</h1>
 
-        <div className="toggle-group">
+        {/* SEMESTER TOGGLE CENTERED */}
+        <div className="toggle-group sem-toggle">
           <button className={activeSem === 1 ? 'active' : ''} onClick={() => setActiveSem(1)}>Sem I</button>
           <button className={activeSem === 2 ? 'active' : ''} onClick={() => setActiveSem(2)}>Sem II</button>
         </div>
 
-        <div className="legend">
+        {/* LEGEND ABOVE CALENDAR */}
+        <div className="legend legend-top">
           <div><span className="dot lecture" /> Lecture</div>
           <div><span className="dot exam" /> Examination</div>
           <div><span className="dot break" /> Break</div>
@@ -126,7 +132,6 @@ const App = () => {
       </header>
 
       <div className="calendar-wrapper" key={activeSem}>
-
         {/* CALENDAR VIEW */}
         {viewMode === 'calendar' ? (
           <div className="calendar-gallery">
@@ -136,10 +141,8 @@ const App = () => {
             }
           </div>
         ) : (
-
           /* LIST VIEW */
           <div className="list-view">
-
             {/* FILTER */}
             <div className="filter-bar">
               {['all', 'lecture', 'exam', 'break', 'registration', 'holiday'].map(f => (
@@ -158,45 +161,34 @@ const App = () => {
               filteredEvents.reduce((acc, ev) => {
                 const date = new Date(ev.start);
                 const key = date.toLocaleString('en-US', { month: 'long', year: 'numeric' });
-
                 if (!acc[key]) acc[key] = [];
                 acc[key].push(ev);
                 return acc;
               }, {})
             ).map(([month, events]) => (
-
               <div key={month}>
                 <div className="list-month sticky">{month}</div>
-
                 {events.map((ev, i) => {
                   const date = new Date(ev.start);
                   const day = date.toLocaleString('en-US', { weekday: 'short' });
                   const dateText = date.toLocaleString('en-US', { day: 'numeric', month: 'short' });
-
                   const endDate = ev.end
                     ? new Date(ev.end).toLocaleString('en-US', { day: 'numeric', month: 'short' })
                     : null;
-
                   return (
                     <div key={i} className="list-item">
-
                       <div className="list-date">
                         <div>{day}</div>
                         <div>{dateText}</div>
                       </div>
-
                       <div className="list-row">
                         <div className={`list-dot ${ev.extendedProps.category}`} />
-
                         <div className="list-content">
                           <div className="list-badge">All Students</div>
                           <div className="list-title">{ev.title}</div>
-                          <div className="list-range">
-                            {endDate ? `${dateText} - ${endDate}` : dateText}
-                          </div>
+                          <div className="list-range">{endDate ? `${dateText} - ${endDate}` : dateText}</div>
                         </div>
                       </div>
-
                     </div>
                   );
                 })}
@@ -205,8 +197,8 @@ const App = () => {
           </div>
         )}
 
-        {/* FLOAT BUTTONS */}
-        <div className="fab-container">
+        {/* FLOAT BUTTONS LEFT BOTTOM */}
+        <div className="floating-buttons">
           <button onClick={handleWhatsAppShare}><FaWhatsapp /></button>
           <button onClick={() => setPosterModal(true)}><FaDownload /></button>
           <button onClick={() => setFeedbackModal(true)}><FaComment /></button>
@@ -219,14 +211,14 @@ const App = () => {
               <iframe
                 src="https://amo.uthm.edu.my/images/USPG/Kalendar_Akaademik_2025/Kalendar_Akademik_BM-01.pdf"
                 className="poster-frame"
-                title="UTHM Academic Calendar 2025 2026"
+                title="UTHM Academic Calendar 2025/2026"
               />
               <button onClick={() => setPosterModal(false)}>Close</button>
             </div>
           </div>
         )}
 
-        {/* FEEDBACK */}
+        {/* FEEDBACK MODAL */}
         {feedbackModal && (
           <div className="modal-overlay" onClick={() => setFeedbackModal(false)}>
             <div className="modal" onClick={e => e.stopPropagation()}>
@@ -239,7 +231,6 @@ const App = () => {
             </div>
           </div>
         )}
-
       </div>
     </div>
   );
