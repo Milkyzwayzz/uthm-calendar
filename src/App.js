@@ -7,6 +7,9 @@ const App = () => {
   const [activeSem, setActiveSem] = useState(1);
   const [viewMode, setViewMode] = useState('calendar');
   const [theme, setTheme] = useState('dark');
+  const toggleTheme = () => {
+    setTheme(prev => (prev === 'dark' ? 'light' : 'dark'));
+  };
   const [posterModal, setPosterModal] = useState(false);
   const [feedbackModal, setFeedbackModal] = useState(false);
   const [feedbacks, setFeedbacks] = useState([]);
@@ -91,20 +94,38 @@ const App = () => {
       <div className="animated-bg"></div>
 
       {/* TOP BAR */}
-      <div className="top-bar">
-        <button onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}>
-          {theme === 'dark' ? '☀ Light' : '🌙 Dark'}
-        </button>
+        <div className="top-bar">
 
-        <div className="view-toggle">
-          <button onClick={() => setViewMode('calendar')} className={viewMode === 'calendar' ? 'active' : ''}>
-            Calendar
-          </button>
-          <button onClick={() => setViewMode('list')} className={viewMode === 'list' ? 'active' : ''}>
-            List
-          </button>
+          <div className="top-bar-left toggle-group">
+            <button className={theme === 'dark' ? 'active theme-toggle' : 'theme-toggle'} onClick={toggleTheme}>
+              {theme === 'dark' ? '☀ Light' : '🌙 Dark'}
+            </button>
+            <div className="view-toggle">
+              <button className={viewMode === 'calendar' ? 'active' : ''} onClick={() => setViewMode('calendar')}>
+                Calendar
+              </button>
+              <button className={viewMode === 'list' ? 'active' : ''} onClick={() => setViewMode('list')}>
+                List
+              </button>
+            </div>
+          </div>
+
+          {/* View Toggle */}
+          <div className="view-toggle toggle-group">
+            <button
+              className={viewMode === 'calendar' ? 'active' : ''}
+              onClick={() => setViewMode('calendar')}
+            >
+              📅 Calendar
+            </button>
+            <button
+              className={viewMode === 'list' ? 'active' : ''}
+              onClick={() => setViewMode('list')}
+            >
+              📋 List
+            </button>
+          </div>
         </div>
-      </div>
 
       {/* HERO */}
       <header className="hero">
@@ -206,7 +227,7 @@ const App = () => {
         )}
 
         {/* FLOAT BUTTONS */}
-        <div className="fab-container">
+        <div className="top-bar-right toggle-group">
           <button onClick={handleWhatsAppShare}><FaWhatsapp /></button>
           <button onClick={() => setPosterModal(true)}><FaDownload /></button>
           <button onClick={() => setFeedbackModal(true)}><FaComment /></button>
