@@ -10,8 +10,12 @@ const App = () => {
     const url = window.location.href;
 
     const whatsappURL = `https://wa.me/?text=${encodeURIComponent(message + " " + url)}`;
-    window.open(whatsappURL, '_blank');
-  }; 
+
+    const win = window.open(whatsappURL, '_blank');
+    if (!win) {
+      alert("Popup blocked! Please allow popups to share.");
+    }
+  };
   const [activeSem, setActiveSem] = useState(1);
 
   // Group A (Johor): 5 = Jumaat, 6 = Sabtu
@@ -83,7 +87,7 @@ const App = () => {
 
       <div className="fab-container">
         <button 
-          className="fab whatsapp"
+          className="fab whatsapp" title="Share on WhatsApp"
           onClick={handleWhatsAppShare}
         >
           <FaWhatsapp />
@@ -91,7 +95,7 @@ const App = () => {
 
         <button 
           className="fab"
-          onClick={() => window.open('/Kalendar_Akademik_BM-01.pdf')}
+          onClick={() => window.open('/Kalendar_Akademik_BM-01.pdf', '_blank')}
         >
           <FaDownload />
         </button>
