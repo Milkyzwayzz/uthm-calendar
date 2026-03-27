@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { uthmEvents } from './calendarData';
-import { FaDownload, FaShareAlt, FaWhatsapp } from 'react-icons/fa';
+import { FaDownload } from 'react-icons/fa';
 import './App.css';
 
 const App = () => {
