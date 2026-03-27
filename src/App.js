@@ -128,23 +128,21 @@ const App = () => {
 
       {/* CALENDAR / LIST TOGGLE TOP RIGHT */}
       <div className="top-right-toggle">
-        <div className="segmented-control">
-          <div
-            className={`slider ${viewMode}`}
-          ></div>
+        <div className="segmented-control advanced">
+          <div className={`slider ${viewMode}`}></div>
 
           <button
             className={viewMode === 'calendar' ? 'active' : ''}
             onClick={() => setViewMode('calendar')}
           >
-            📅 Calendar
+            <span>📅</span> Calendar
           </button>
 
           <button
             className={viewMode === 'list' ? 'active' : ''}
             onClick={() => setViewMode('list')}
           >
-            📋 List
+            <span>📋</span> List
           </button>
         </div>
       </div>
@@ -171,18 +169,7 @@ const App = () => {
       </header>
 
       <div className="calendar-wrapper" key={activeSem}>
-        {/* CALENDAR VIEW */}
-        {viewMode === 'calendar' ? (
-          <div className="calendar-gallery">
-            {activeSem === 1
-              ? [8, 9, 10, 11, 0, 1].map(m => renderMonth(m, m >= 8 ? 2025 : 2026))
-              : [2, 3, 4, 5, 6].map(m => renderMonth(m, 2026))
-            }
-          </div>
-        ) : (
-          /* LIST VIEW */
-          <div className="list-view">
-            {/* FILTER */}
+        {/* FILTER */}
             <div className="filter-bar">
               {['all', 'lecture', 'exam', 'break', 'registration', 'holiday'].map(f => (
                 <button
@@ -194,7 +181,17 @@ const App = () => {
                 </button>
               ))}
             </div>
-
+        {/* CALENDAR VIEW */}
+        {viewMode === 'calendar' ? (
+          <div className="calendar-gallery">
+            {activeSem === 1
+              ? [8, 9, 10, 11, 0, 1].map(m => renderMonth(m, m >= 8 ? 2025 : 2026))
+              : [2, 3, 4, 5, 6].map(m => renderMonth(m, 2026))
+            }
+          </div>
+        ) : (
+          /* LIST VIEW */
+          <div className="list-view">
             {/* GROUP BY MONTH */}
             {Object.entries(
               filteredEvents.reduce((acc, ev) => {
@@ -238,41 +235,29 @@ const App = () => {
 
         {/* FLOAT BUTTONS LEFT BOTTOM */}
         <div className="floating-buttons">
-          <div className="fab-container">
-            
-            {/* MAIN BUTTON */}
-            <button className="fab-main">
-              +
-            </button>
+          <button
+            className="floating-btn whatsapp"
+            onClick={handleWhatsAppShare}
+            data-label="Share"
+          >
+            <FaWhatsapp />
+          </button>
 
-            {/* EXPAND ITEMS */}
-            <div className="fab-items">
-              <button
-                className="floating-btn whatsapp"
-                onClick={handleWhatsAppShare}
-                data-label="Share"
-              >
-                <FaWhatsapp />
-              </button>
+          <button
+            className="floating-btn download"
+            onClick={() => setPosterModal(true)}
+            data-label="Download"
+          >
+            <FaDownload />
+          </button>
 
-              <button
-                className="floating-btn download"
-                onClick={() => setPosterModal(true)}
-                data-label="Download"
-              >
-                <FaDownload />
-              </button>
-
-              <button
-                className="floating-btn feedback"
-                onClick={() => setFeedbackModal(true)}
-                data-label="Feedback"
-              >
-                <FaComment />
-              </button>
-            </div>
-
-          </div>
+          <button
+            className="floating-btn feedback"
+            onClick={() => setFeedbackModal(true)}
+            data-label="Feedback"
+          >
+            <FaComment />
+          </button>
         </div>
 
         {/* POSTER MODAL */}
