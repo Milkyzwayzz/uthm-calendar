@@ -219,6 +219,7 @@ const App = () => {
               <iframe
                 src="https://amo.uthm.edu.my/images/USPG/Kalendar_Akaademik_2025/Kalendar_Akademik_BM-01.pdf"
                 className="poster-frame"
+                title="UTHM Academic Calendar 2025/2026"
               />
               <button onClick={() => setPosterModal(false)}>Close</button>
             </div>
