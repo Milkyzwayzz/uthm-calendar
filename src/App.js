@@ -130,14 +130,70 @@ const App = () => {
         </div>
       ) : (
         <div className="list-view">
-          {uthmEvents.map((ev, i) => (
-            <div key={i} className={`list-item ${ev.extendedProps.category}`}>
-              <strong>{ev.start}</strong>: {ev.title}
+
+          {/* Group events by month */}
+          {Object.entries(
+            uthmEvents.reduce((acc, ev) => {
+              const date = new Date(ev.start);
+              const monthKey = date.toLocaleString('en-US', { month: 'long', year: 'numeric' });
+
+              if (!acc[monthKey]) acc[monthKey] = [];
+              acc[monthKey].push(ev);
+
+              return acc;
+            }, {})
+          ).map(([month, events]) => (
+            
+            <div key={month}>
+              <div className="list-month">{month}</div>
+
+              {events.map((ev, i) => {
+                const date = new Date(ev.start);
+
+                const day = date.toLocaleString('en-US', { weekday: 'short' });
+                const dateText = date.toLocaleString('en-US', { day: 'numeric', month: 'short' });
+
+                const endDate = ev.end
+                  ? new Date(ev.end).toLocaleString('en-US', { day: 'numeric', month: 'short' })
+                  : null;
+
+                return (
+                  <div key={i} className="list-item">
+
+                    {/* LEFT DATE */}
+                    <div className="list-date">
+                      <div className="day">{day}</div>
+                      <div className="date">{dateText}</div>
+                    </div>
+
+                    {/* RIGHT CONTENT */}
+                    <div className="list-row">
+
+                      {/* COLOR DOT */}
+                      <div className={`list-dot ${ev.extendedProps.category}`}></div>
+
+                      <div className="list-content">
+                        <div className="list-badge">All Students</div>
+
+                        <div className="list-title">
+                          {ev.title}
+                        </div>
+
+                        <div className="list-range">
+                          {endDate
+                            ? `${dateText} - ${endDate}`
+                            : dateText}
+                        </div>
+                      </div>
+
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           ))}
         </div>
       )}
-
       {/* Floating Buttons */}
       <div className="fab-container">
         <button className="fab whatsapp" title="Share to WhatsApp" onClick={handleWhatsAppShare}><FaWhatsapp /></button>

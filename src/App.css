@@ -406,25 +406,47 @@ body {
 
 /* List View */
 .list-view {
-  padding: 20px 5%;
+  padding: 30px 6%;
+  max-width: 900px;
+  margin: auto;
+}
+
+/* Month Title */
+.list-month {
+  font-size: 2rem;
+  font-weight: 800;
+  margin: 30px 0 20px;
+  color: #fff;
+}
+
+.app-light .list-month {
+  color: #000;
 }
 
 /* List view enhancements */
+/* Each Item Row */
 .list-item {
-  padding: 12px 16px;
-  margin-bottom: 12px;
-  border-radius: 14px;
-  backdrop-filter: blur(12px);
-  background: rgba(255,255,255,0.08); /* slightly stronger glass effect */
-  font-size: 0.95rem;
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  color: #fff; /* dark mode */
+  gap: 18px;
+  padding: 16px;
+  margin-bottom: 16px;
+  border-radius: 16px;
+  background: rgba(255,255,255,0.05);
+  backdrop-filter: blur(10px);
+  transition: all 0.25s ease;
+  border: 1px solid rgba(255,255,255,0.08);
 }
 
+.list-item:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 25px rgba(0,0,0,0.4);
+}
+
+/* LIGHT MODE FIX */
 .app-light .list-item {
-  color: #000; /* light mode */
+  background: #ffffff;
+  border: 1px solid #e4e4e7;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.05);
 }
 
 /* List item color-coded dots */
@@ -436,6 +458,88 @@ body {
   margin-right: 10px;
   display: inline-block;
   flex-shrink: 0;
+}
+
+/* LEFT DATE COLUMN */
+.list-date {
+  min-width: 80px;
+  text-align: left;
+}
+
+.list-date .day {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.list-date .date {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #fff;
+}
+
+.app-light .list-date .date {
+  color: #000;
+}
+
+/* RIGHT CONTENT */
+.list-content {
+  flex: 1;
+}
+
+/* Badge */
+.list-badge {
+  display: inline-block;
+  font-size: 0.7rem;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.1);
+  margin-bottom: 6px;
+  font-weight: 600;
+}
+
+.app-light .list-badge {
+  background: #f1f5f9;
+  color: #000;
+}
+
+/* Title */
+.list-title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 4px;
+}
+
+.app-light .list-title {
+  color: #000;
+}
+
+/* Date Range */
+.list-range {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+/* Colored indicator dot */
+.list-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  margin-top: 6px;
+}
+
+/* Event Colors */
+.list-dot.lecture { background: var(--purple); }
+.list-dot.exam { background: var(--red); }
+.list-dot.break { background: var(--green); }
+.list-dot.registration { background: var(--orange); }
+.list-dot.holiday { background: var(--holiday); }
+
+/* Layout for dot + content */
+.list-row {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
 }
 
 .list-item.lecture::before { background: var(--purple); }
