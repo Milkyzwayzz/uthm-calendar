@@ -18,6 +18,7 @@ body {
 .tile .day-num {
   font-size: 1.3rem; /* larger date numbers */
   font-weight: 700;
+  color: #fff;
 }
 
 /* LIGHT MODE */
@@ -26,6 +27,10 @@ body {
   --card: #fff;
   --text-muted: #52525b;
   color: #000;
+}
+
+.app-light .tile .day-num {
+  color: #000; /* light mode */
 }
 
 /* Horizontal legend for events (Lecture, Exam, Break, Registration) */
@@ -41,6 +46,12 @@ body {
   display: flex;
   align-items: center;
   gap: 6px;
+  font-weight: 700;
+  color: #fff; /* dark mode text */
+}
+
+.app-light .legend .item {
+  color: #000; /* light mode text */
 }
 
 .legend .dot {
@@ -109,6 +120,12 @@ body {
   padding: 12px 30px;
   font-size: 1rem;
   border-radius: 14px;
+  color: #fff; /* dark mode text */
+  font-weight: 700;
+}
+
+.app-light .toggle-group button {
+  color: #000; /* light mode text */
 }
 
 /* Calendar Gallery */
@@ -134,6 +151,11 @@ body {
   padding: 18px;
   border: 1px solid rgba(255,255,255,0.08);
   transition: all 0.3s ease;
+  color: #fff; /* dark mode */
+}
+
+.app-light .month-card h3 {
+  color: #000; /* light mode */
 }
 
 .month-card:hover {
@@ -220,6 +242,11 @@ body {
   padding: 4px 8px;
   border-radius: 6px;
   font-weight: 600;
+  color: #fff; /* dark mode */
+}
+
+.app-light .tooltip-item {
+  color: #000; /* light mode */
 }
 
 /* Show tooltip on hover */
@@ -227,10 +254,21 @@ body {
   display: block;
 }
 
-.tooltip-item.lecture { background-color: var(--purple); }
-.tooltip-item.exam { background-color: var(--red); }
-.tooltip-item.break { background-color: var(--green); }
-.tooltip-item.registration { background-color: #f59e0b; } /* orange */
+.tooltip-item.lecture { background-color: var(--purple); font-weight: 600;
+  color: #fff; /* dark mode */ }
+.tooltip-item.exam { background-color: var(--red); font-weight: 600;
+  color: #fff; /* dark mode */}
+.tooltip-item.break { background-color: var(--green); font-weight: 600;
+  color: #fff; /* dark mode */}
+.tooltip-item.registration { background-color: #f59e0b; font-weight: 600;
+  color: #fff; /* dark mode */ }
+
+.app-light .tooltip-item.lecture,
+.app-light .tooltip-item.exam,
+.app-light .tooltip-item.break,
+.app-light .tooltip-item.registration {
+  color: #000; /* light mode */
+}
 
 /* Floating Buttons */
 .fab-container {
@@ -268,6 +306,10 @@ body {
   border-radius: 8px;
   white-space: nowrap;
   z-index: 50;
+}
+
+.app-light .fab:hover::after {
+  color: #000; /* light mode */
 }
 
 .fab.whatsapp {
@@ -344,6 +386,11 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  color: #fff; /* dark mode */
+}
+
+.app-light .list-item {
+  color: #000; /* light mode */
 }
 
 /* List item color-coded dots */
