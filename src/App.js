@@ -1,131 +1,81 @@
-import React, { useState, useEffect } from 'react';
-import FullCalendar from '@fullcalendar/react';
-import dayGridPlugin from '@fullcalendar/daygrid';
-import interactionPlugin from '@fullcalendar/interaction';
+import React, { useState } from 'react';
 import { uthmEvents } from './calendarData';
-import { FaSun, FaMoon, FaCalendarAlt, FaListUl, FaWhatsapp, FaSearch, FaFilePdf } from 'react-icons/fa';
+import { FaDownload, FaShareAlt, FaWhatsapp } from 'react-icons/fa';
 import './App.css';
 
 const App = () => {
-  const [darkMode, setDarkMode] = useState(false);
-  const [view, setView] = useState('calendar');
-  const [searchTerm, setSearchTerm] = useState('');
-  const [displayEvents, setDisplayEvents] = useState(uthmEvents);
+  const [activeSem, setActiveSem] = useState(1);
 
-  // Filter logic for search
-  useEffect(() => {
-    const results = uthmEvents.filter(event =>
-      event.title.toLowerCase().includes(searchTerm.toLowerCase())
+  // Group A (Johor): 5 = Jumaat, 6 = Sabtu
+  const isJohorWeekend = (day) => day === 5 || day === 6;
+
+  const renderMonth = (month, year) => {
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    const firstDay = new Date(year, month, 1).getDay();
+    const monthName = new Date(year, month).toLocaleString('ms-MY', { month: 'long' });
+
+    // Monday start offset: 0=Isnin, 6=Ahad
+    const offset = firstDay === 0 ? 6 : firstDay - 1;
+    
+    let tiles = [];
+    for (let i = 0; i < offset; i++) tiles.push(<div key={`e-${i}`} className="tile empty" />);
+
+    for (let d = 1; d <= daysInMonth; d++) {
+      const dateObj = new Date(year, month, d);
+      const dateStr = dateObj.toISOString().split('T')[0];
+      const events = uthmEvents.filter(e => dateStr >= e.start && dateStr <= (e.end || e.start));
+
+      tiles.push(
+        <div key={d} className={`tile ${isJohorWeekend(dateObj.getDay()) ? 'weekend' : ''}`}>
+          <span className="day-num">{d}</span>
+          <div className="dots">
+            {events.map((ev, i) => (
+              <span key={i} className={`dot ${ev.extendedProps.category}`} title={ev.title} />
+            ))}
+          </div>
+        </div>
+      );
+    }
+
+    return (
+      <div className="month-card" key={`${month}-${year}`}>
+        <h3>{monthName} {year}</h3>
+        <div className="days-header">
+          {['Is', 'Se', 'Ra', 'Kh', 'Ju', 'Sa', 'Ah'].map(d => <div key={d}>{d}</div>)}
+        </div>
+        <div className="days-grid">{tiles}</div>
+      </div>
     );
-    setDisplayEvents(results);
-  }, [searchTerm]);
-
-  const shareToWhatsapp = (event) => {
-    const dateStr = new Date(event.start).toLocaleDateString('en-MY', { day: 'numeric', month: 'long' });
-    const text = `📌 UTHM Academic Date:\n✨ ${event.title}\n📅 ${dateStr}\n\nCheck it out here!`;
-    window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
-  };
-
-  const addToGoogleCalendar = (event) => {
-    const formatDate = (date) => new Date(date).toISOString().replace(/-|:|\.\d+/g, '');
-    const start = formatDate(event.start);
-    const end = event.end ? formatDate(event.end) : start;
-    
-    const gCalUrl = `https://www.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(event.title)}&dates=${start}/${end}&details=${encodeURIComponent('Academic Date for UTHM Sesi 2025/2026')}&sf=true&output=xml`;
-    
-    window.open(gCalUrl, '_blank');
-  };
-
-  const downloadPDF = () => {
-    // This looks for the file in your 'public' folder
-    const link = document.createElement('a');
-    link.href = '/Kalendar_Akademik_BM-01.pdf'; 
-    link.download = 'UTHM_Academic_Calendar_25_26.pdf';
-    link.click();
   };
 
   return (
-    <div className={`app-container ${darkMode ? 'dark' : ''}`}>
-      <header className="glass-header">
-        <div className="logo-section">
-          <FaCalendarAlt className="icon-main" />
-          <h1>UTHM <span>Cuti</span></h1>
+    <div className="app-dark">
+      <header className="hero">
+        <div className="year-pill">2025 / 2026</div>
+        <h1>Bila <span>UTHM</span> Cuti?</h1>
+        
+        <div className="toggle-group">
+          <button className={activeSem === 1 ? 'active' : ''} onClick={() => setActiveSem(1)}>Sem I</button>
+          <button className={activeSem === 2 ? 'active' : ''} onClick={() => setActiveSem(2)}>Sem II</button>
         </div>
-        <div className="header-actions">
-          <button className="download-btn" onClick={downloadPDF} title="Download Official PDF">
-            <FaFilePdf /> PDF
-          </button>
-          <button className="theme-toggle" onClick={() => setDarkMode(!darkMode)}>
-            {darkMode ? <FaSun /> : <FaMoon />}
-          </button>
+
+        <div className="legend">
+          <div className="item"><span className="dot lecture" /> Kuliah</div>
+          <div className="item"><span className="dot exam" /> Periksa</div>
+          <div className="item"><span className="dot break" /> Cuti</div>
         </div>
-        <button className="theme-toggle" onClick={() => setDarkMode(!darkMode)}>
-          {darkMode ? <FaSun /> : <FaMoon />}
-        </button>
       </header>
 
-      <div className="search-bar-container">
-        <div className="search-input-wrapper">
-          <FaSearch className="search-icon" />
-          <input 
-            type="text" 
-            placeholder="Search events (e.g., 'Exam', 'Raya', 'Break')..." 
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
-        </div>
+      <div className="calendar-gallery">
+        {activeSem === 1 
+          ? [8, 9, 10, 11, 0, 1].map(m => renderMonth(m, m >= 8 ? 2025 : 2026)) 
+          : [2, 3, 4, 5, 6].map(m => renderMonth(m, 2026))
+        }
       </div>
 
-      <div className="control-panel">
-        <div className="view-switcher">
-          <button className={view === 'calendar' ? 'active' : ''} onClick={() => setView('calendar')}>
-            <FaCalendarAlt /> Calendar
-          </button>
-          <button className={view === 'list' ? 'active' : ''} onClick={() => setView('list')}>
-            <FaListUl /> List View
-          </button>
-        </div>
+      <div className="fab-container">
+        <button className="fab" onClick={() => window.open('/Kalendar_Akademik_BM-01.pdf')}><FaDownload /></button>
       </div>
-
-      <main className="content-area">
-        {view === 'calendar' ? (
-          /* CALENDAR VIEW */
-          <div className="calendar-card">
-            <FullCalendar
-              plugins={[dayGridPlugin, interactionPlugin]}
-              initialView="dayGridMonth"
-              events={displayEvents}
-              height="auto"
-              eventClick={(info) => shareToWhatsapp(info.event)}
-              eventClassNames={(arg) => [`event-${arg.event.extendedProps.category}`]}
-            />
-          </div>
-        ) : (
-          /* LIST VIEW */
-          <div className="list-view">
-            {displayEvents.length > 0 ? (
-              displayEvents.map(event => (
-                <div key={event.id} className={`list-card border-${event.extendedProps.category}`}>
-                  <div className="list-info">
-                    <h3>{event.title}</h3>
-                    <p>{new Date(event.start).toLocaleDateString('en-MY', { day: 'numeric', month: 'long', year: 'numeric' })}</p>
-                  </div>
-                  <div className="list-actions">
-                    <button className="gcal-btn" onClick={() => addToGoogleCalendar(event)}>
-                      + Google Cal
-                    </button>
-                    <button className="share-btn" onClick={() => shareToWhatsapp(event)}>
-                      <FaWhatsapp /> Share
-                    </button>
-                  </div>
-                </div>
-              ))
-            ) : (
-              <div className="no-results">No events found for "{searchTerm}"</div>
-            )}
-          </div>
-        )}
-      </main>
     </div>
   );
 };
