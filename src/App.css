@@ -373,12 +373,15 @@ body {
 }
 
 /* Tooltip items spacing and padding */
+/* DEFAULT TOOLTIP */
 .tooltip-item {
-  margin: 2px 6px;
-  padding: 4px 8px;
+  padding: 6px 10px;
   border-radius: 6px;
-  font-weight: 600;
-  color: #fff; /* dark mode */
+  color: white;
+  font-size: 12px;
+  margin-bottom: 4px;
+  background: rgba(255,255,255,0.1);
+  border-left: 4px solid;
 }
 
 .app-light .tooltip-item {
@@ -390,51 +393,88 @@ body {
   display: block;
 }
 
-.tooltip-item.lecture { background-color: var(--purple); font-weight: 600;
-  color: #fff; /* dark mode */ }
-.tooltip-item.exam { background-color: var(--red); font-weight: 600;
-  color: #fff; /* dark mode */}
-.tooltip-item.break { background-color: var(--green); font-weight: 600;
-  color: #fff; /* dark mode */}
-.tooltip-item.registration { background-color: #f59e0b; font-weight: 600;
-  color: #fff; /* dark mode */ }
+/* CATEGORY COLORS (MATCH DOT COLORS) */
+.tooltip-item.lecture {
+  background: #1E90FF; /* blue */
+}
+
+.tooltip-item.exam {
+  background: #FF4500; /* red/orange */
+}
+
+.tooltip-item.break {
+  background: #FFD700; /* yellow */
+  color: black; /* better contrast */
+}
+
+.tooltip-item.registration {
+  background: #32CD32; /* green */
+}
+
+.tooltip-item.holiday {
+  background: #FF69B4; /* pink */
+}
+
+/* COLORS */
+.tooltip-item.lecture { border-color: #1E90FF; }
+.tooltip-item.exam { border-color: #FF4500; }
+.tooltip-item.break { border-color: #FFD700; }
+.tooltip-item.registration { border-color: #32CD32; }
+.tooltip-item.holiday { border-color: #FF69B4; }
 
 .app-light .tooltip-item.lecture,
 .app-light .tooltip-item.exam,
 .app-light .tooltip-item.break,
-.app-light .tooltip-item.registration {
+.app-light .tooltip-item.registration,
+.app-light .tooltip-item.holiday {
+
   color: #000; /* light mode */
 }
 
 /* Floating Buttons */
 .fab-container {
-  position: fixed;
-  bottom: 25px;
-  right: 25px;
+  position: relative;
   display: flex;
   flex-direction: column;
-  gap: 18px; /* more spacing for usability */
-  z-index: 100;
+  align-items: center;
 }
 
-.fab {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px; /* if using icon + text inside */
-  padding: 12px 18px; /* bigger for tap area */
-  border-radius: 50px; /* pill style */
-  font-weight: 700;
-  font-size: 1rem;
+.fab-main {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: #6C63FF;
+  color: white;
+  font-size: 28px;
   border: none;
   cursor: pointer;
-  position: relative;
-  transition: all 0.25s ease;
-  overflow: hidden;
-  box-shadow: 0 6px 18px rgba(0,0,0,0.25);
-  color: #fff;
-  min-width: 120px; /* makes all buttons uniform */
-  text-align: center;
+  transition: 0.3s;
+  z-index: 2;
+}
+
+.fab-container:hover .fab-main {
+  transform: rotate(45deg);
+}
+
+/* ITEMS WRAPPER */
+.fab-items {
+  position: absolute;
+  bottom: 70px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(20px);
+  transition: all 0.3s ease;
+}
+
+/* SHOW ON HOVER */
+.fab-container:hover .fab-items {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(0);
 }
 
 .fab:hover {
@@ -854,25 +894,51 @@ body {
   .modal { width: 95%; padding: 16px; }
 }
 
-/* FLOAT BUTTONS LEFT BOTTOM */
-.floating-buttons {
-  position: fixed;
-  left: 20px;
-  bottom: 20px;
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
-  z-index: 1000;
-}
-
-.floating-buttons button {
+/* BUTTON STYLE */
+.floating-btn {
+  position: relative;
   width: 50px;
   height: 50px;
   border-radius: 50%;
   border: none;
   color: white;
-  font-size: 22px;
+  font-size: 20px;
   cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: 0.3s;
+}
+
+.floating-btn:hover {
+  transform: scale(1.1);
+}
+
+/* COLORS */
+.floating-btn.whatsapp { background: #25D366; }
+.floating-btn.download { background: #6C63FF; }
+.floating-btn.feedback { background: #8A4FFF; }
+
+/* TOOLTIP */
+.floating-btn::after {
+  content: attr(data-label);
+  position: absolute;
+  right: 60px;
+  background: rgba(0,0,0,0.8);
+  color: #fff;
+  padding: 6px 10px;
+  border-radius: 8px;
+  font-size: 12px;
+  white-space: nowrap;
+
+  opacity: 0;
+  transform: translateX(10px);
+  transition: 0.3s;
+}
+
+.floating-btn:hover::after {
+  opacity: 1;
+  transform: translateX(0);
 }
 
 .floating-buttons button:nth-child(1) { background: #25D366; } /* WhatsApp green */
@@ -942,3 +1008,121 @@ body {
 .dot.break { background: #FFD700; }
 .dot.registration { background: #32CD32; }
 .dot.holiday { background: #FF69B4; }
+
+/* CURSOR GLOW */
+.cursor-glow {
+  position: fixed;
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 999;
+
+  transform: translate(-50%, -50%);
+  transition: all 0.08s linear;
+
+  background: radial-gradient(
+    circle,
+    rgba(108, 99, 255, 0.35) 0%,   /* center glow */
+    rgba(108, 99, 255, 0.15) 40%,
+    rgba(108, 99, 255, 0.05) 70%,
+    transparent 100%
+  );
+
+  filter: blur(20px);
+}
+
+/* LIGHT MODE ADJUSTMENT */
+.app-light .cursor-glow {
+  background: radial-gradient(
+    circle,
+    rgba(108, 99, 255, 0.25) 0%,
+    rgba(108, 99, 255, 0.1) 50%,
+    transparent 100%
+  );
+}
+
+.cursor-glow.lecture {
+  background: radial-gradient(circle, rgba(30,144,255,0.35), transparent);
+}
+
+.cursor-glow.exam {
+  background: radial-gradient(circle, rgba(255,69,0,0.35), transparent);
+}
+
+.cursor-glow.break {
+  background: radial-gradient(circle, rgba(255,215,0,0.35), transparent);
+}
+
+.cursor-glow.registration {
+  background: radial-gradient(circle, rgba(50,205,50,0.35), transparent);
+}
+
+.cursor-glow.holiday {
+  background: radial-gradient(circle, rgba(255,105,180,0.35), transparent);
+}
+
+/* SEGMENTED CONTROL CONTAINER */
+.segmented-control {
+  position: relative;
+  display: flex;
+  background: rgba(255,255,255,0.08);
+  border-radius: 999px;
+  padding: 5px;
+  backdrop-filter: blur(10px);
+  overflow: hidden;
+}
+
+/* BUTTONS */
+.segmented-control button {
+  position: relative;
+  z-index: 2;
+  border: none;
+  background: transparent;
+  color: inherit;
+  padding: 8px 16px;
+  border-radius: 999px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: 0.3s;
+}
+
+.segmented-control button:hover {
+  opacity: 0.8;
+}
+
+/* ACTIVE TEXT */
+.segmented-control button.active {
+  color: white;
+  font-weight: 500;
+}
+
+/* SLIDING BACKGROUND */
+.segmented-control .slider {
+  position: absolute;
+  top: 5px;
+  bottom: 5px;
+  width: 50%;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #6C63FF, #8A4FFF);
+  transition: all 0.3s ease;
+  z-index: 1;
+}
+
+/* POSITION SWITCH */
+.segmented-control .slider.calendar {
+  left: 5px;
+}
+
+.segmented-control .slider.list {
+  left: calc(50% - 5px);
+}
+
+/* DARK / LIGHT MODE SUPPORT */
+.app-light .segmented-control {
+  background: rgba(0,0,0,0.05);
+}
+
+.app-light .segmented-control button.active {
+  color: white;
+}

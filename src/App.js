@@ -12,6 +12,11 @@ const App = () => {
   const [feedbacks, setFeedbacks] = useState([]);
   const [feedbackInput, setFeedbackInput] = useState('');
   const [activeFilter, setActiveFilter] = useState('all');
+  const [cursor, setCursor] = useState({
+    x: 0,
+    y: 0,
+    type: 'default'
+  });
 
   const isJohorWeekend = (day) => day === 5 || day === 6;
 
@@ -55,7 +60,27 @@ const App = () => {
       );
 
       tiles.push(
-        <div key={d} className={`tile ${isJohorWeekend(dateObj.getDay()) ? 'weekend' : ''}`}>
+        <div
+          key={d}
+          className={`tile ${isJohorWeekend(dateObj.getDay()) ? 'weekend' : ''}`}
+          onMouseMove={(e) => {
+            if (events.length > 0) {
+              setCursor(prev => ({
+                ...prev,
+                x: e.clientX,
+                y: e.clientY,
+                type: events[0].extendedProps.category
+              }));
+            } else {
+              setCursor(prev => ({
+                ...prev,
+                x: e.clientX,
+                y: e.clientY,
+                type: 'default'
+              }));
+            }
+          }}
+        >
           <span className="day-num">{d}</span>
           <div className="dots">
             {events.map((ev, i) => (
@@ -84,7 +109,14 @@ const App = () => {
   };
 
   return (
-    <div className={`app-${theme}`}>
+    <div className={`app-${theme}`}
+      onMouseMove={(e) => {
+        setCursor(prev => ({
+          ...prev,
+          x: e.clientX,
+          y: e.clientY
+        }));
+      }}>
       <div className="animated-bg"></div>
 
       {/* THEME TOGGLE TOP LEFT */}
@@ -96,18 +128,25 @@ const App = () => {
 
       {/* CALENDAR / LIST TOGGLE TOP RIGHT */}
       <div className="top-right-toggle">
-        <button
-          className={viewMode === 'calendar' ? 'active' : ''}
-          onClick={() => setViewMode('calendar')}
-        >
-          📅 Calendar
-        </button>
-        <button
-          className={viewMode === 'list' ? 'active' : ''}
-          onClick={() => setViewMode('list')}
-        >
-          📋 List
-        </button>
+        <div className="segmented-control">
+          <div
+            className={`slider ${viewMode}`}
+          ></div>
+
+          <button
+            className={viewMode === 'calendar' ? 'active' : ''}
+            onClick={() => setViewMode('calendar')}
+          >
+            📅 Calendar
+          </button>
+
+          <button
+            className={viewMode === 'list' ? 'active' : ''}
+            onClick={() => setViewMode('list')}
+          >
+            📋 List
+          </button>
+        </div>
       </div>
 
       {/* HERO */}
@@ -199,9 +238,41 @@ const App = () => {
 
         {/* FLOAT BUTTONS LEFT BOTTOM */}
         <div className="floating-buttons">
-          <button onClick={handleWhatsAppShare}><FaWhatsapp /></button>
-          <button onClick={() => setPosterModal(true)}><FaDownload /></button>
-          <button onClick={() => setFeedbackModal(true)}><FaComment /></button>
+          <div className="fab-container">
+            
+            {/* MAIN BUTTON */}
+            <button className="fab-main">
+              +
+            </button>
+
+            {/* EXPAND ITEMS */}
+            <div className="fab-items">
+              <button
+                className="floating-btn whatsapp"
+                onClick={handleWhatsAppShare}
+                data-label="Share"
+              >
+                <FaWhatsapp />
+              </button>
+
+              <button
+                className="floating-btn download"
+                onClick={() => setPosterModal(true)}
+                data-label="Download"
+              >
+                <FaDownload />
+              </button>
+
+              <button
+                className="floating-btn feedback"
+                onClick={() => setFeedbackModal(true)}
+                data-label="Feedback"
+              >
+                <FaComment />
+              </button>
+            </div>
+
+          </div>
         </div>
 
         {/* POSTER MODAL */}
@@ -232,6 +303,13 @@ const App = () => {
           </div>
         )}
       </div>
+      <div
+        className={`cursor-glow ${cursor.type}`}
+        style={{
+          left: cursor.x,
+          top: cursor.y
+        }}
+      />
     </div>
   );
 };
