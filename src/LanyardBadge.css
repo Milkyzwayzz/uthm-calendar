@@ -1,0 +1,68 @@
+.badge-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  margin: 40px 0;
+}
+
+.badge-card {
+  width: 250px;
+  height: 350px;
+  background: rgba(255,255,255,0.08);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 20px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  transition: transform 0.5s ease;
+  box-shadow: 0 15px 30px rgba(0,0,0,0.5);
+  cursor: grab;
+}
+
+.badge-top {
+  background: linear-gradient(135deg, #8b5cf6, #22d3ee);
+  padding: 20px;
+  text-align: center;
+}
+
+.badge-top img {
+  width: 60px;
+}
+
+.badge-body {
+  flex: 1;
+  padding: 15px;
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  text-align: center;
+  gap: 6px;
+}
+
+/* BUTTON CONTROLS */
+.badge-controls button {
+  padding: 8px 12px;
+  margin: 0 4px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  font-weight: 600;
+  background: linear-gradient(135deg, #8b5cf6, #6366f1);
+  color: white;
+  transition: all 0.25s ease;
+}
+.badge-controls button:hover { transform: scale(1.05); }
+
+/* ANIMATIONS */
+.badge-card.leftRight { animation: leftRight 2s infinite alternate; }
+.badge-card.rightLeft { animation: rightLeft 2s infinite alternate; }
+.badge-card.upDown { animation: upDown 2s infinite alternate; }
+.badge-card.downUp { animation: downUp 2s infinite alternate; }
+
+@keyframes leftRight { 0% { transform: translateX(0px) rotate(-2deg); } 100% { transform: translateX(40px) rotate(2deg); } }
+@keyframes rightLeft { 0% { transform: translateX(0px) rotate(2deg); } 100% { transform: translateX(-40px) rotate(-2deg); } }
+@keyframes upDown { 0% { transform: translateY(0px) rotate(-1deg); } 100% { transform: translateY(40px) rotate(1deg); } }
+@keyframes downUp { 0% { transform: translateY(0px) rotate(1deg); } 100% { transform: translateY(-40px) rotate(-1deg); } }
