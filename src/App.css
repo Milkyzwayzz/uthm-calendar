@@ -135,23 +135,26 @@ body {
   backdrop-filter: blur(8px);
 }
 
+/* ==========================
+   TOGGLE BUTTONS (Light/Dark)
+========================== */
 .theme-toggle,
-.view-toggle button,
 .toggle-group button {
-  padding: 8px 14px;
-  border-radius: 10px;
-  border: 1px solid var(--card-soft);
+  padding: 10px 16px;
+  border-radius: 12px;
+  border: 2px solid var(--purple);
   cursor: pointer;
   font-weight: 700;
-  transition: all 0.25s ease;
   background: var(--card);
   color: var(--text-muted);
+  transition: all 0.25s ease;
 }
 
-.view-toggle button.active {
+.toggle-group button.active {
   background: var(--purple);
   color: #fff;
-  outline: 2px solid #fff; /* ensures visibility */
+  outline: 2px solid #fff;
+  transform: scale(1.05);
 }
 
 /* HERO */
@@ -202,8 +205,17 @@ body {
   font-weight: 700;
 }
 
+/* LIGHT MODE TOGGLE */
+.app-light .theme-toggle,
 .app-light .toggle-group button {
-  color: #000; /* light mode text */
+  background: var(--card);
+  color: #000;
+  border: 2px solid var(--purple);
+}
+
+.app-light .toggle-group button.active {
+  background: var(--purple);
+  color: #fff;
 }
 
 /* Calendar Gallery */
@@ -290,7 +302,9 @@ body {
   margin-top: 8px;
 }
 
-/* Increase dot visibility */
+/* ==========================
+   CALENDAR DOTS (All Modes)
+========================== */
 .dot {
   width: 12px;
   height: 12px;
@@ -301,7 +315,14 @@ body {
 .dot.exam { background: var(--red); }
 .dot.break { background: var(--green); }
 .dot.registration { background: var(--orange); }
-.dot.holiday { background: var(--holiday); } /* public holiday */
+.dot.holiday { background: var(--holiday); }
+
+/* LIGHT MODE DOTS */
+.app-light .dot.lecture { background: var(--purple); }
+.app-light .dot.exam { background: var(--red); }
+.app-light .dot.break { background: var(--green); }
+.app-light .dot.registration { background: var(--orange); }
+.app-light .dot.holiday { background: var(--holiday); }
 
 /* Tooltip above tile */
 .tooltip {
@@ -361,19 +382,27 @@ body {
   right: 25px;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 18px; /* more spacing for usability */
+  z-index: 100;
 }
 
 .fab {
-  width: 62px;
-  height: 62px;
+  width: 64px;
+  height: 64px;
   border-radius: 50%;
   background: linear-gradient(135deg, #8b5cf6, #6366f1);
   color: #fff;
   border: none;
-  font-size: 1.4rem;
+  font-size: 1.5rem;
   cursor: pointer;
-  box-shadow: 0 10px 30px rgba(139,92,246,0.5);
+  box-shadow: 0 12px 35px rgba(139,92,246,0.6);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  position: relative;
+}
+
+.fab:hover {
+  transform: scale(1.1);
+  box-shadow: 0 15px 40px rgba(139,92,246,0.7);
 }
 
 /* Floating buttons hover text */
@@ -398,6 +427,31 @@ body {
 
 .fab.whatsapp {
   background: linear-gradient(135deg, #25D366, #16a34a);
+}
+
+/* FAB TOOLTIP */
+.fab::after {
+  content: attr(title);
+  position: absolute;
+  bottom: 70px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 0.75rem;
+  background: rgba(0,0,0,0.85);
+  color: #fff;
+  padding: 4px 8px;
+  border-radius: 8px;
+  white-space: nowrap;
+  display: none;
+  z-index: 50;
+}
+
+.fab:hover::after { display: block; }
+
+/* LIGHT MODE TOOLTIP */
+.app-light .fab::after {
+  background: rgba(0,0,0,0.85);
+  color: #fff;
 }
 
 .filter-bar {
