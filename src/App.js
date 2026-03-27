@@ -1,9 +1,17 @@
 import React, { useState } from 'react';
 import { uthmEvents } from './calendarData';
-import { FaDownload } from 'react-icons/fa';
+import { FaDownload, FaWhatsapp } from 'react-icons/fa';
 import './App.css';
 
 const App = () => {
+
+  const handleWhatsAppShare = () => {
+    const message = "Check out UTHM Academic Calendar 📅✨";
+    const url = window.location.href;
+
+    const whatsappURL = `https://wa.me/?text=${encodeURIComponent(message + " " + url)}`;
+    window.open(whatsappURL, '_blank');
+  }; 
   const [activeSem, setActiveSem] = useState(1);
 
   // Group A (Johor): 5 = Jumaat, 6 = Sabtu
@@ -74,7 +82,19 @@ const App = () => {
       </div>
 
       <div className="fab-container">
-        <button className="fab" onClick={() => window.open('/Kalendar_Akademik_BM-01.pdf')}><FaDownload /></button>
+        <button 
+          className="fab whatsapp"
+          onClick={handleWhatsAppShare}
+        >
+          <FaWhatsapp />
+        </button>
+
+        <button 
+          className="fab"
+          onClick={() => window.open('/Kalendar_Akademik_BM-01.pdf')}
+        >
+          <FaDownload />
+        </button>
       </div>
     </div>
   );
