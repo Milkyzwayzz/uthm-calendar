@@ -112,7 +112,16 @@ const App = () => {
 
     return (
       <div className="month-card" key={`${month}-${year}`}>
-        <h3>{new Date(year, month).toLocaleString('ms-MY', { month: 'long' })} {year}</h3>
+        <h3 className="month-title">
+          {new Date(year, month).toLocaleString('ms-MY', { month: 'long' })} {year}
+        </h3>
+
+        <div className="weekday-row">
+          {['Mon','Tue','Wed','Thu','Fri','Sat','Sun'].map(d => (
+            <div key={d}>{d}</div>
+          ))}
+        </div>
+
         <div className="days-grid">{tiles}</div>
       </div>
     );
@@ -160,7 +169,11 @@ const App = () => {
       {/* HERO */}
       <header className="hero">
         <div className="year-pill">2025 / 2026</div>
-        <h1>Bila <span>UTHM</span> Cuti?</h1>
+        <h1>
+          <span className="title-pill">Bila</span>{' '}
+          <span>UTHM</span>{' '}
+          <span className="title-pill">Cuti?</span>
+        </h1>
 
         {/* SEMESTER TOGGLE CENTERED */}
         <div className="toggle-group sem-toggle">
@@ -184,7 +197,7 @@ const App = () => {
               {['all', 'lecture', 'exam', 'break', 'registration', 'holiday'].map(f => (
                 <button
                   key={f}
-                  className={activeFilter === f ? 'active' : ''}
+                  className={`${f} ${activeFilter === f ? 'active' : ''}`}
                   onClick={() => setActiveFilter(f)}
                 >
                   {f.toUpperCase()}

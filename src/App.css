@@ -102,6 +102,25 @@ body {
   color: #fff; /* dark mode text */
 }
 
+.legend div {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+}
+
+/* LIGHT MODE */
+.app-light .legend div {
+  background: #f3f4f6;
+}
+
+/* DARK MODE */
+.app-dark .legend div {
+  background: rgba(255,255,255,0.1);
+}
+
 .app-light .legend .item {
   color: #000; /* light mode text */
 }
@@ -261,10 +280,18 @@ body {
   background: rgba(255,255,255,0.04);
   backdrop-filter: blur(14px);
   border-radius: 20px;
-  padding: 18px;
+  padding: 10px;
   border: 1px solid rgba(255,255,255,0.15);
   transition: all 0.3s ease;
   color: #fff; /* dark mode */
+  overflow: hidden;
+  margin-bottom: 20px;
+}
+
+/* Light override */
+.app-light .month-card {
+  background: #ffffff;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.05);
 }
 
 .month-card:hover {
@@ -273,11 +300,23 @@ body {
   box-shadow: 0 15px 40px rgba(0,0,0,0.5);
 }
 
+/* MOBILE */
+@media (max-width: 600px) {
+  .month-card {
+    padding: 8px;
+  }
+
+  .tile {
+    font-size: 10px;
+    padding: 4px;
+  }
+}
+
 /* Tiles */
 .days-grid {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  gap: 6px;
+  gap: 4px;
 }
 
 .tile {
@@ -549,22 +588,21 @@ body {
   display: flex;
   justify-content: center;
   flex-wrap: wrap;
-  gap: 10px;
-  margin: 20px 0;
+  gap: 8px;
+  margin-bottom: 15px;
 }
 
 /* FILTER BUTTON */
 .filter-bar button {
-  border: none;
-  padding: 8px 14px;
+  padding: 6px 12px;
   border-radius: 999px;
+  border: none;
+  font-size: 12px;
+  font-weight: 600;
   cursor: pointer;
-  font-weight: bold;
-
-  background: rgba(255,255,255,0.08);
-  color: #ccc;
-
-  transition: all 0.25s ease;
+  color: white;
+  opacity: 0.7;
+  transition: 0.3s;
 }
 
 /* HOVER */
@@ -580,8 +618,23 @@ body {
 .filter-bar button.registration { background-color: #2196f3; } /* blue */
 .filter-bar button.holiday { background-color: #9c27b0; } /* purple */
 
+/* COLORS */
+.filter-bar .lecture { background: #22c55e; }
+.filter-bar .exam { background: #ef4444; }
+.filter-bar .break { background: #f59e0b; }
+.filter-bar .registration { background: #3b82f6; }
+.filter-bar .holiday { background: #a855f7; }
+.filter-bar .all { background: #6b7280; }
+
+/* DARK MODE BOOST */
+.app-dark .filter-bar button {
+  box-shadow: 0 0 8px rgba(255,255,255,0.15);
+}
+
+/* ACTIVE = FULL COLOR */
 .filter-bar button.active {
-  box-shadow: 0 0 5px rgba(0,0,0,0.3);
+  opacity: 1;
+  transform: scale(1.05);
 }
 
 /* LIGHT MODE */
@@ -682,14 +735,21 @@ body {
 
 /* Month Title */
 .list-month {
-  font-size: 2rem;
-  font-weight: 800;
-  margin: 30px 0 20px;
-  color: #fff;
+  font-weight: bold;
+  margin: 15px 0 10px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  display: inline-block;
 }
 
+/* Light */
 .app-light .list-month {
-  color: #000;
+  background: #e5e7eb;
+}
+
+/* Dark */
+.app-dark .list-month {
+  background: rgba(255,255,255,0.1);
 }
 
 /* List view enhancements */
@@ -731,8 +791,10 @@ body {
 
 /* LEFT DATE COLUMN */
 .list-date {
-  min-width: 80px;
-  text-align: left;
+  padding: 6px;
+  border-radius: 10px;
+  text-align: center;
+  min-width: 60px;
 }
 
 .list-date .day {
@@ -748,6 +810,16 @@ body {
 
 .app-light .list-date .date {
   color: #000;
+}
+
+/* Light */
+.app-light .list-date {
+  background: #f3f4f6;
+}
+
+/* Dark */
+.app-dark .list-date {
+  background: rgba(255,255,255,0.1);
 }
 
 /* RIGHT CONTENT */
@@ -1068,6 +1140,41 @@ body {
   background: radial-gradient(circle, rgba(255,105,180,0.35), transparent);
 }
 
+.segmented-control {
+  display: flex;
+  width: 100%;
+  max-width: 220px;
+  border-radius: 999px;
+  overflow: hidden;
+  background: rgba(0,0,0,0.05);
+}
+
+.segmented-control button {
+  flex: 1;
+  padding: 8px;
+  font-size: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+/* MOBILE FIX */
+@media (max-width: 600px) {
+  .top-right-toggle {
+    right: 10px;
+    top: 10px;
+  }
+
+  .segmented-control {
+    max-width: 180px;
+  }
+
+  .segmented-control button span {
+    font-size: 16px;
+  }
+}
+
 /* SEGMENTED CONTROL CONTAINER */
 /* ADVANCED SEGMENTED CONTROL */
 .segmented-control.advanced {
@@ -1174,4 +1281,31 @@ body {
   padding: 8px;
   margin-bottom: 5px;
   border-radius: 5px;
+}
+
+.title-pill {
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-weight: 600;
+}
+
+/* Light */
+.app-light .title-pill {
+  background: #f3f4f6;
+  color: #111;
+}
+
+/* Dark */
+.app-dark .title-pill {
+  background: rgba(255,255,255,0.1);
+  color: #fff;
+}
+
+.weekday-row {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  font-size: 11px;
+  text-align: center;
+  margin-bottom: 5px;
+  opacity: 0.7;
 }
