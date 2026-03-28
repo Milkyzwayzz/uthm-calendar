@@ -1,10 +1,32 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { uthmEvents } from './calendarData';
 import { FaDownload, FaWhatsapp, FaComment } from 'react-icons/fa';
+import { saveAs } from "file-saver";
+import html2canvas from "html2canvas";
+
+// Firebase imports
+import { initializeApp } from "firebase/app";
+import { getFirestore, collection, addDoc, getDocs } from "firebase/firestore";
+import { getAnalytics } from "firebase/analytics";
+
 import './App.css';
 
+const firebaseConfig = {
+    apiKey: "AIzaSyDSLnr0s3S3uK-FnzZd0UJGXMW20Gpp6bE",
+    authDomain: "uthmcalendar.firebaseapp.com",
+    projectId: "uthmcalendar",
+    storageBucket: "uthmcalendar.firebasestorage.app",
+    messagingSenderId: "96104020555",
+    appId: "1:96104020555:web:602971eedff40ce782abce",
+    measurementId: "G-WGNRTQBEV1"
+};
+
+const app = initializeApp(firebaseConfig);
+const analytics = getAnalytics(app);
+export const db = getFirestore(app);
+
 const App = () => {
-  const [activeSem, setActiveSem] = useState(1);
+  const [activeSem, setActiveSem] = useState('khas');
   const [viewMode, setViewMode] = useState('calendar');
   const [theme, setTheme] = useState('dark');
   const [posterModal, setPosterModal] = useState(false);
@@ -18,6 +40,27 @@ const App = () => {
     type: 'default'
   });
 
+  const [feedbackList, setFeedbackList] = useState([]);
+
+  useEffect(() => {
+    const fetchFeedback = async () => {
+      const data = await getDocs(collection(db, "feedback"));
+      setFeedbackList(data.docs.map(doc => doc.data()));
+    };
+    fetchFeedback();
+  }, []);
+
+  const downloadImage = () => {
+  const calendar = document.getElementById("calendar-container");
+
+  html2canvas(calendar).then(canvas => {
+    const link = document.createElement("a");
+    link.download = "calendar.png";
+    link.href = canvas.toDataURL();
+    link.click();
+  });
+};
+
   const isJohorWeekend = (day) => day === 5 || day === 6;
 
   const toggleTheme = () => setTheme(theme === 'dark' ? 'light' : 'dark');
@@ -28,8 +71,48 @@ const App = () => {
     window.open(`https://wa.me/?text=${encodeURIComponent(message + " " + url)}`, '_blank');
   };
 
-  const handleFeedbackSubmit = () => {
+  const downloadICS = () => {
+    let icsContent = `BEGIN:VCALENDAR
+    VERSION:2.0
+    CALSCALE:GREGORIAN
+    `;
+
+      uthmEvents.forEach(event => {
+        const start = event.start.replace(/-/g, "");
+        const end = event.end
+          ? event.end.replace(/-/g, "")
+          : start;
+
+        icsContent += `
+    BEGIN:VEVENT
+    SUMMARY:${event.title}
+    DTSTART:${start}
+    DTEND:${end}
+    END:VEVENT
+    `;
+      });
+
+      icsContent += "END:VCALENDAR";
+
+      const blob = new Blob([icsContent], { type: "text/calendar;charset=utf-8" });
+      saveAs(blob, "UTHM_Calendar.ics");
+    };
+
+    const submitFeedback = async (text) => {
+    try {
+      await addDoc(collection(db, "feedback"), {
+        message: text,
+        createdAt: new Date()
+      });
+      alert("Feedback sent!");
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const handleFeedbackSubmit = async () => {
     if (!feedbackInput.trim()) return;
+    await submitFeedback(feedbackInput);
     setFeedbacks([...feedbacks, feedbackInput]);
     setFeedbackInput('');
     setFeedbackModal(false);
@@ -47,7 +130,8 @@ const App = () => {
 
   // Filter events by category
   const filteredEvents = uthmEvents.filter(ev =>
-    activeFilter === 'all' || ev.extendedProps.category === activeFilter
+    (activeFilter === 'all' || ev.extendedProps.category === activeFilter) &&
+    ev.extendedProps.semester === activeSem
   );
 
   const renderMonth = (month, year) => {
@@ -176,9 +260,19 @@ const App = () => {
         </h1>
 
         {/* SEMESTER TOGGLE CENTERED */}
-        <div className="toggle-group sem-toggle">
-          <button className={activeSem === 1 ? 'active' : ''} onClick={() => setActiveSem(1)}>Sem I</button>
-          <button className={activeSem === 2 ? 'active' : ''} onClick={() => setActiveSem(2)}>Sem II</button>
+        <div className="toggle-group sem-toggle advanced">
+          <button className={activeSem === 'khas' ? 'active' : ''} onClick={() => setActiveSem('khas')}>
+            Sem Khas
+          </button>
+          <button className={activeSem === 'sem1' ? 'active' : ''} onClick={() => setActiveSem('sem1')}>
+            Sem I
+          </button>
+          <button className={activeSem === 'sem2' ? 'active' : ''} onClick={() => setActiveSem('sem2')}>
+            Sem II
+          </button>
+          <button className={activeSem === 'sem3' ? 'active' : ''} onClick={() => setActiveSem('sem3')}>
+            Sem III
+          </button>
         </div>
 
         {/* LEGEND ABOVE CALENDAR */}
@@ -207,10 +301,21 @@ const App = () => {
         {/* CALENDAR VIEW */}
         {viewMode === 'calendar' ? (
           <div className="calendar-gallery">
-            {activeSem === 1
-              ? [8, 9, 10, 11, 0, 1].map(m => renderMonth(m, m >= 8 ? 2025 : 2026))
-              : [2, 3, 4, 5, 6].map(m => renderMonth(m, 2026))
-            }
+            {activeSem === 'khas' && (
+              [6, 7, 8].map(m => renderMonth(m, 2025)) // Jul–Sep 2025
+            )}
+
+            {activeSem === 'sem1' && (
+              [9, 10, 11, 0, 1].map(m => renderMonth(m, m >= 9 ? 2025 : 2026))
+            )}
+
+            {activeSem === 'sem2' && (
+              [2, 3, 4, 5, 6].map(m => renderMonth(m, 2026))
+            )}
+
+            {activeSem === 'sem3' && (
+              [6, 7, 8].map(m => renderMonth(m, 2026)) // Jul–Sep 2026
+            )}
           </div>
         ) : (
           /* LIST VIEW */
@@ -273,6 +378,10 @@ const App = () => {
           >
             <FaDownload />
           </button>
+          <div className="download-menu">
+            <button onClick={downloadICS}>Download Calendar File</button>
+            <button onClick={downloadImage}>Download as Image</button>
+          </div>
 
           <button
             className="floating-btn feedback"
@@ -281,6 +390,15 @@ const App = () => {
           >
             <FaComment />
           </button>
+          <div className="feedback-section">
+            <h3>User Feedback</h3>
+
+            {feedbackList.map((fb, index) => (
+              <div key={index} className="feedback-card">
+                {fb.message}
+              </div>
+            ))}
+          </div>
         </div>
 
         {/* POSTER MODAL */}
