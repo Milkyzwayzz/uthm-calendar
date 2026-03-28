@@ -612,17 +612,17 @@ body {
 }
 
 .filter-bar button.all { background-color: gray; }
-.filter-bar button.lecture { background-color: #4caf50; } /* green */
+.filter-bar button.lecture { background-color: #1e90ff; } /* green */
 .filter-bar button.exam { background-color: #f44336; } /* red */
 .filter-bar button.break { background-color: #ff9800; } /* orange */
-.filter-bar button.registration { background-color: #2196f3; } /* blue */
+.filter-bar button.registration { background-color: #4caf50; } /* blue */
 .filter-bar button.holiday { background-color: #9c27b0; } /* purple */
 
 /* COLORS */
-.filter-bar .lecture { background: #22c55e; }
+.filter-bar .lecture { background: #1e90ff; }
 .filter-bar .exam { background: #ef4444; }
 .filter-bar .break { background: #f59e0b; }
-.filter-bar .registration { background: #3b82f6; }
+.filter-bar .registration { background: #4caf50; }
 .filter-bar .holiday { background: #a855f7; }
 .filter-bar .all { background: #6b7280; }
 
@@ -902,6 +902,45 @@ body {
 .app-dark .month-card h3 { color: #fff; }
 .app-light .month-card h3 { color: #000; }
 
+.pill-text {
+  padding: 6px 14px;
+  border-radius: 999px;
+  font-weight: 600;
+  display: inline-block;
+  transition: all 0.3s ease;
+}
+
+/* 🌞 LIGHT MODE */
+.app-light .pill-text {
+  background: #ffffff;
+  color: #111;
+  box-shadow: 
+    0 2px 6px rgba(0,0,0,0.08),
+    inset 0 1px 0 rgba(255,255,255,0.6);
+}
+
+/* 🌙 DARK MODE */
+.app-dark .pill-text {
+  background: rgba(255,255,255,0.08);
+  color: #fff;
+  box-shadow: 
+    0 2px 8px rgba(0,0,0,0.4),
+    inset 0 1px 0 rgba(255,255,255,0.1);
+  backdrop-filter: blur(6px);
+}
+
+.pill-text:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+}
+
+@media (max-width: 600px) {
+  .pill-text {
+    padding: 4px 10px;
+    font-size: 14px;
+  }
+}
+
 /* Animated background */
 .animated-bg {
   position: fixed;
@@ -1142,21 +1181,47 @@ body {
 
 .segmented-control {
   display: flex;
-  width: 100%;
-  max-width: 220px;
   border-radius: 999px;
-  overflow: hidden;
-  background: rgba(0,0,0,0.05);
+  padding: 4px;
+  background: rgba(0,0,0,0.08);
+  width: 260px; /* 👈 increase size */
+  position: relative;
 }
 
+/* BUTTON */
 .segmented-control button {
   flex: 1;
-  padding: 8px;
-  font-size: 12px;
+  padding: 10px 14px; /* 👈 bigger click area */
+  font-size: 14px;
+  font-weight: 600;
+  border-radius: 999px;
+  border: none;
+  cursor: pointer;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  gap: 2px;
+  transition: all 0.25s ease;
+}
+
+.segmented-control .slider {
+  position: absolute;
+  top: 4px;
+  bottom: 4px;
+  width: 50%;
+  border-radius: 999px;
+  background: #1a73e8;
+  transition: 0.3s;
+}
+
+/* Move slider */
+.segmented-control .slider.calendar {
+  left: 4px;
+}
+
+.segmented-control .slider.list {
+  left: calc(50% - 4px);
 }
 
 /* MOBILE FIX */
@@ -1173,6 +1238,44 @@ body {
   .segmented-control button span {
     font-size: 16px;
   }
+}
+
+@media (max-width: 600px) {
+  .segmented-control {
+    width: 200px;
+  }
+
+  .segmented-control button {
+    font-size: 12px;
+    padding: 8px;
+  }
+}
+
+/* LIGHT MODE */
+.app-light .segmented-control button {
+  color: #333;
+}
+
+/* DARK MODE */
+.app-dark .segmented-control {
+  background: rgba(255,255,255,0.08);
+}
+
+.app-dark .segmented-control button {
+  color: rgba(255,255,255,0.7);
+}
+
+/* ACTIVE BUTTON */
+.segmented-control button.active {
+  background: #1a73e8;
+  color: #fff !important;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+}
+
+/* DARK MODE ACTIVE */
+.app-dark .segmented-control button.active {
+  background: #3b82f6;
+  color: #fff !important;
 }
 
 /* SEGMENTED CONTROL CONTAINER */

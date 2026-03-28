@@ -169,10 +169,10 @@ const App = () => {
       {/* HERO */}
       <header className="hero">
         <div className="year-pill">2025 / 2026</div>
-        <h1>
-          <span className="title-pill">Bila</span>{' '}
+        <h1 className="hero-title">
+          <span className="pill-text">Bila</span>{' '}
           <span>UTHM</span>{' '}
-          <span className="title-pill">Cuti?</span>
+          <span className="pill-text">Cuti?</span>
         </h1>
 
         {/* SEMESTER TOGGLE CENTERED */}
