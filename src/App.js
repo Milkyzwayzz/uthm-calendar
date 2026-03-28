@@ -35,6 +35,16 @@ const App = () => {
     setFeedbackModal(false);
   };
 
+  const handleDownload = () => {
+    const url = "https://amo.uthm.edu.my/images/USPG/Kalendar_Akaademik_2025/Kalendar_Akademik_BM-01.pdf";
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = "UTHM_Academic_Calendar_2025-2026.pdf";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   // Filter events by category
   const filteredEvents = uthmEvents.filter(ev =>
     activeFilter === 'all' || ev.extendedProps.category === activeFilter
@@ -245,7 +255,7 @@ const App = () => {
 
           <button
             className="floating-btn download"
-            onClick={() => setPosterModal(true)}
+            onClick={handleDownload}
             data-label="Download"
           >
             <FaDownload />
@@ -278,12 +288,25 @@ const App = () => {
         {feedbackModal && (
           <div className="modal-overlay" onClick={() => setFeedbackModal(false)}>
             <div className="modal" onClick={e => e.stopPropagation()}>
-              <textarea
-                value={feedbackInput}
-                onChange={e => setFeedbackInput(e.target.value)}
-              />
-              <button onClick={handleFeedbackSubmit}>Submit</button>
-              <button onClick={() => setFeedbackModal(false)}>Cancel</button>
+              {feedbacks.length === 0 ? (
+                <>
+                  <textarea
+                    value={feedbackInput}
+                    onChange={e => setFeedbackInput(e.target.value)}
+                    placeholder="Write your feedback..."
+                  />
+                  <button onClick={handleFeedbackSubmit}>Submit</button>
+                  <button onClick={() => setFeedbackModal(false)}>Cancel</button>
+                </>
+              ) : (
+                <>
+                  <div className="feedback-received">✅ Feedback received!</div>
+                  <div className="my-feedback">{feedbacks.map((fb, i) => (
+                    <div key={i} className="feedback-item">{fb}</div>
+                  ))}</div>
+                  <button onClick={() => setFeedbackModal(false)}>Close</button>
+                </>
+              )}
             </div>
           </div>
         )}

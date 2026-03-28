@@ -51,18 +51,6 @@ body {
   }
 }
 
-.filter-bar button {
-  transition: all 0.2s ease;
-}
-
-.filter-bar button:hover {
-  transform: translateY(-2px);
-}
-
-.filter-bar button.active {
-  transform: scale(1.05);
-}
-
 .calendar-wrapper {
   animation: fadeScale 0.35s ease;
 }
@@ -571,6 +559,7 @@ body {
   padding: 8px 14px;
   border-radius: 999px;
   cursor: pointer;
+  font-weight: bold;
 
   background: rgba(255,255,255,0.08);
   color: #ccc;
@@ -584,12 +573,15 @@ body {
   color: white;
 }
 
-/* ACTIVE */
-.filter-bar button.active {
-  background: linear-gradient(135deg, #6C63FF, #8A4FFF);
-  color: white;
+.filter-bar button.all { background-color: gray; }
+.filter-bar button.lecture { background-color: #4caf50; } /* green */
+.filter-bar button.exam { background-color: #f44336; } /* red */
+.filter-bar button.break { background-color: #ff9800; } /* orange */
+.filter-bar button.registration { background-color: #2196f3; } /* blue */
+.filter-bar button.holiday { background-color: #9c27b0; } /* purple */
 
-  box-shadow: 0 0 12px rgba(108,99,255,0.5);
+.filter-bar button.active {
+  box-shadow: 0 0 5px rgba(0,0,0,0.3);
 }
 
 /* LIGHT MODE */
@@ -906,16 +898,16 @@ body {
 /* BUTTON STYLE */
 .floating-btn {
   position: relative;
-  width: 50px;
-  height: 50px;
+  width: 60px;
+  height: 60px;
   border-radius: 50%;
   border: none;
   color: white;
   font-size: 20px;
   cursor: pointer;
   display: flex;
-  align-items: right;
-  justify-content: right;
+  align-items: center;
+  justify-content: center;
   transition: 0.3s;
 }
 
@@ -1096,20 +1088,25 @@ body {
 
 /* BUTTON STYLE */
 .segmented-control.advanced button {
-  position: relative;
+
   z-index: 2;
   border: none;
-  background: transparent;
+
   color: #ccc;
-  padding: 10px 18px;
+
   border-radius: 999px;
   cursor: pointer;
 
+  flex: 1;
   display: flex;
+  flex-direction: column; /* icon above text */
+  justify-content: center;
   align-items: center;
-  gap: 6px;
-
+  padding: 8px;
   font-size: 14px;
+  border: none;
+  background: none;
+  position: relative;
   transition: all 0.25s ease;
 }
 
@@ -1158,4 +1155,23 @@ body {
 
 .app-light .segmented-control.advanced button {
   color: #555;
+}
+
+.feedback-received {
+  font-weight: bold;
+  color: green;
+  margin-bottom: 10px;
+  text-align: center;
+}
+
+.my-feedback {
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.feedback-item {
+  background-color: #f0f0f0;
+  padding: 8px;
+  margin-bottom: 5px;
+  border-radius: 5px;
 }
