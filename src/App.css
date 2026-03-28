@@ -234,7 +234,7 @@ body {
   font-weight: 800;
 }
 
-.hero h1 span {
+.hero h1 span:not(.pill-text) {
   background: linear-gradient(90deg, #8b5cf6, #22d3ee);
   background-clip: text;
   -webkit-background-clip: text;
@@ -908,6 +908,8 @@ body {
   font-weight: 600;
   display: inline-block;
   transition: all 0.3s ease;
+  -webkit-text-fill-color: unset !important;
+  color: inherit;
 }
 
 /* 🌞 LIGHT MODE */
