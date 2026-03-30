@@ -5,9 +5,7 @@ import { saveAs } from "file-saver";
 import html2canvas from "html2canvas";
 
 // Firebase imports
-import { initializeApp } from "firebase/app";
 import { getFirestore, collection, addDoc, getDocs } from "firebase/firestore";
-import { getAnalytics } from "firebase/analytics";
 
 import './App.css';
 import { db } from "./firebase";
@@ -21,10 +19,6 @@ const firebaseConfig = {
   messagingSenderId: process.env.REACT_APP_FIREBASE_MESSAGING_SENDER_ID,
   appId: process.env.REACT_APP_FIREBASE_APP_ID,
 };
-
-const app = initializeApp(firebaseConfig);
-const analytics = getAnalytics(app);
-export const db = getFirestore(app);
 
 const App = () => {
   const [activeSem, setActiveSem] = useState('khas');
