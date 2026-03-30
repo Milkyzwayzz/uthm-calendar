@@ -10,15 +10,16 @@ import { getFirestore, collection, addDoc, getDocs } from "firebase/firestore";
 import { getAnalytics } from "firebase/analytics";
 
 import './App.css';
+import { db } from "./firebase";
 
+//firebase config
 const firebaseConfig = {
-    apiKey: "AIzaSyDSLnr0s3S3uK-FnzZd0UJGXMW20Gpp6bE",
-    authDomain: "uthmcalendar.firebaseapp.com",
-    projectId: "uthmcalendar",
-    storageBucket: "uthmcalendar.firebasestorage.app",
-    messagingSenderId: "96104020555",
-    appId: "1:96104020555:web:602971eedff40ce782abce",
-    measurementId: "G-WGNRTQBEV1"
+  apiKey: process.env.REACT_APP_FIREBASE_API_KEY,
+  authDomain: process.env.REACT_APP_FIREBASE_AUTH_DOMAIN,
+  projectId: process.env.REACT_APP_FIREBASE_PROJECT_ID,
+  storageBucket: process.env.REACT_APP_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: process.env.REACT_APP_FIREBASE_MESSAGING_SENDER_ID,
+  appId: process.env.REACT_APP_FIREBASE_APP_ID,
 };
 
 const app = initializeApp(firebaseConfig);
@@ -98,24 +99,30 @@ const App = () => {
       saveAs(blob, "UTHM_Calendar.ics");
     };
 
-    const submitFeedback = async (text) => {
-    try {
-      await addDoc(collection(db, "feedback"), {
-        message: text,
-        createdAt: new Date()
-      });
-      alert("Feedback sent!");
-    } catch (e) {
-      console.error(e);
+  const submitFeedback = async (text) => {
+    if (!text.trim() || text.length > 300) {
+      alert("Feedback must be 1–300 characters");
+      return;
     }
+
+    await addDoc(collection(db, "feedback"), {
+      message: text.trim(),
+      createdAt: new Date(),
+    });
   };
 
+  const [lastSubmitTime, setLastSubmitTime] = useState(0);
+
   const handleFeedbackSubmit = async () => {
-    if (!feedbackInput.trim()) return;
+    const now = Date.now();
+
+    if (now - lastSubmitTime < 5000) {
+      alert("Please wait before submitting again.");
+      return;
+    }
+
     await submitFeedback(feedbackInput);
-    setFeedbacks([...feedbacks, feedbackInput]);
-    setFeedbackInput('');
-    setFeedbackModal(false);
+    setLastSubmitTime(now);
   };
 
   const handleDownload = () => {

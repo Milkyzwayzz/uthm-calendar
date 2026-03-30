@@ -81,8 +81,9 @@ body {
   color: #000;
 }
 
+/* Day numbers color for light mode */
 .app-light .tile .day-num {
-  color: #000; /* light mode */
+  color: #000 !important;
 }
 
 /* Horizontal legend for events (Lecture, Exam, Break, Registration) */
