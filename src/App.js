@@ -21,12 +21,11 @@ const firebaseConfig = {
 };
 
 const App = () => {
-  const [activeSem, setActiveSem] = useState('khas');
+  const [activeSem, setActiveSem] = useState('all');
   const [viewMode, setViewMode] = useState('calendar');
   const [theme, setTheme] = useState('dark');
   const [posterModal, setPosterModal] = useState(false);
   const [feedbackModal, setFeedbackModal] = useState(false);
-  const [feedbacks, setFeedbacks] = useState([]);
   const [feedbackInput, setFeedbackInput] = useState('');
   const [activeFilter, setActiveFilter] = useState('all');
   const [cursor, setCursor] = useState({
@@ -36,11 +35,16 @@ const App = () => {
   });
 
   const [feedbackList, setFeedbackList] = useState([]);
+  const [showDownloadMenu, setShowDownloadMenu] = useState(false);
 
   useEffect(() => {
     const fetchFeedback = async () => {
       const data = await getDocs(collection(db, "feedback"));
-      setFeedbackList(data.docs.map(doc => doc.data()));
+      const sorted = data.docs
+        .map(doc => doc.data())
+        .sort((a, b) => b.createdAt?.seconds - a.createdAt?.seconds);
+
+      setFeedbackList(sorted);
     };
     fetchFeedback();
   }, []);
@@ -115,8 +119,38 @@ const App = () => {
       return;
     }
 
-    await submitFeedback(feedbackInput);
-    setLastSubmitTime(now);
+    if (!feedbackInput.trim() || feedbackInput.length > 300) {
+      alert("Feedback must be 1–300 characters");
+      return;
+    }
+
+    try {
+      // Submit to Firestore
+      await addDoc(collection(db, "feedback"), {
+        message: feedbackInput.trim(),
+        createdAt: new Date(),
+      });
+
+      // Update local feedback list immediately
+      setFeedbackList(prev => [
+        ...prev,
+        { message: feedbackInput.trim(), createdAt: new Date() }
+      ]);
+
+      // Clear input and update last submit time
+      setFeedbackInput('');
+      setLastSubmitTime(now);
+
+      setFeedbackModal(false);
+      alert("✅ Feedback received!");
+
+      const updated = await getDocs(collection(db, "feedback"));
+      setFeedbackList(updated.docs.map(doc => doc.data()));
+
+    } catch (err) {
+      console.error("Error submitting feedback:", err);
+      alert("❌ Failed to submit feedback.");
+    }
   };
 
   const handleDownload = () => {
@@ -132,7 +166,7 @@ const App = () => {
   // Filter events by category
   const filteredEvents = uthmEvents.filter(ev =>
     (activeFilter === 'all' || ev.extendedProps.category === activeFilter) &&
-    ev.extendedProps.semester === activeSem
+    (activeSem === 'all' || ev.extendedProps.semester === activeSem)
   );
 
   const renderMonth = (month, year) => {
@@ -148,7 +182,9 @@ const App = () => {
 
     for (let d = 1; d <= daysInMonth; d++) {
       const dateObj = new Date(year, month, d);
-      const dateStr = dateObj.toISOString().split('T')[0];
+      const dateStr = new Date(
+        dateObj.getTime() - dateObj.getTimezoneOffset() * 60000
+      ).toISOString().split('T')[0];
 
       const events = filteredEvents.filter(e =>
         dateStr >= e.start && dateStr <= (e.end || e.start)
@@ -374,15 +410,18 @@ const App = () => {
 
           <button
             className="floating-btn download"
-            onClick={handleDownload}
+            onClick={() => setShowDownloadMenu(prev => !prev)}
             data-label="Download"
           >
             <FaDownload />
           </button>
-          <div className="download-menu">
-            <button onClick={downloadICS}>Download Calendar File</button>
-            <button onClick={downloadImage}>Download as Image</button>
-          </div>
+          {showDownloadMenu && (
+            <div className="download-menu">
+              <button onClick={downloadICS}>Download Calendar File</button>
+              <button onClick={downloadImage}>Download as Image</button>
+              <button onClick={handleDownload}>Download Original PDF</button>
+            </div>
+          )}
 
           <button
             className="floating-btn feedback"
@@ -418,30 +457,32 @@ const App = () => {
 
         {/* FEEDBACK MODAL */}
         {feedbackModal && (
-          <div className="modal-overlay" onClick={() => setFeedbackModal(false)}>
-            <div className="modal" onClick={e => e.stopPropagation()}>
-              {feedbacks.length === 0 ? (
-                <>
-                  <textarea
-                    value={feedbackInput}
-                    onChange={e => setFeedbackInput(e.target.value)}
-                    placeholder="Write your feedback..."
-                  />
-                  <button onClick={handleFeedbackSubmit}>Submit</button>
-                  <button onClick={() => setFeedbackModal(false)}>Cancel</button>
-                </>
-              ) : (
-                <>
-                  <div className="feedback-received">✅ Feedback received!</div>
-                  <div className="my-feedback">{feedbacks.map((fb, i) => (
-                    <div key={i} className="feedback-item">{fb}</div>
-                  ))}</div>
-                  <button onClick={() => setFeedbackModal(false)}>Close</button>
-                </>
-              )}
+        <div className="modal-overlay" onClick={() => setFeedbackModal(false)}>
+          <div className="modal" onClick={e => e.stopPropagation()}>
+            <h3>Write Your Feedback</h3>
+            <textarea
+              value={feedbackInput}
+              onChange={e => setFeedbackInput(e.target.value)}
+              placeholder="Write your feedback..."
+            />
+            <div className="modal-buttons">
+              <button onClick={handleFeedbackSubmit}>Submit</button>
+              <button onClick={() => setFeedbackModal(false)}>Cancel</button>
             </div>
+
+            <h3>User Feedback</h3>
+            {feedbackList.length === 0 ? (
+              <p>No feedback yet.</p>
+            ) : (
+              feedbackList.map((fb, i) => (
+                <div key={i} className="feedback-card">
+                  {fb.message}
+                </div>
+              ))
+            )}
           </div>
-        )}
+        </div>
+      )}
       </div>
       <div
         className={`cursor-glow ${cursor.type}`}

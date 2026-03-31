@@ -190,31 +190,44 @@ export const uthmEvents = [
   title: "Hari Raya Aidilfitri",
   start: "2026-03-20",
   end: "2026-03-21",
+  allDay: true,
   extendedProps: { category: "holiday", semester: "sem2" }
 },
 {
   title: "Hari Pekerja",
   start: "2026-05-01",
+  allDay: true,
   extendedProps: { category: "holiday", semester: "sem2" }
 },
 {
   title: "Hari Raya Aidiladha",
   start: "2026-05-27",
+  allDay: true,
   extendedProps: { category: "holiday", semester: "sem2" }
 },
 {
   title: "Hari Wesak",
   start: "2026-05-31",
+  allDay: true,
   extendedProps: { category: "holiday", semester: "sem2" }
 },
 {
   title: "Agong Birthday",
   start: "2026-06-01",
+  allDay: true,
+  extendedProps: { category: "holiday", semester: "sem2" }
+},
+{
+  title: "Hari Raya Aidiladha",
+  start: "2026-05-27",
+  allDay: true,
+
   extendedProps: { category: "holiday", semester: "sem2" }
 },
 {
   title: "Awal Muharram",
   start: "2026-06-17",
+  allDay: true,
   extendedProps: { category: "holiday", semester: "sem2" }
 },
 
