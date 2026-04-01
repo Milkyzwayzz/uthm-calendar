@@ -25,19 +25,26 @@ const App = () => {
     type: 'default'
   });
 
+  useEffect(() => {
+    const handleClick = () => setShowDownloadMenu(false);
+    window.addEventListener("click", handleClick);
+
+    return () => window.removeEventListener("click", handleClick);
+  }, []);
+
   const [feedbackList, setFeedbackList] = useState([]);
   const [showDownloadMenu, setShowDownloadMenu] = useState(false);
-  const [isDevMode, setIsDevMode] = useState(false); // Dev mode toggle
 
   useEffect(() => {
     const fetchFeedback = async () => {
       try {
-        console.log('Fetching feedback...');
+        console.log('Fetching feedback...'); // Debug log
         const data = await getDocs(collection(db, "feedback"));
         const sorted = data.docs
           .map(doc => ({ id: doc.id, ...doc.data() }))
           .sort((a, b) => b.createdAt?.seconds - a.createdAt?.seconds);
         setFeedbackList(sorted);
+        console.log('Feedback fetched:', sorted); // Debug log
       } catch (error) {
         console.error('Error fetching feedback:', error);
       }
@@ -47,33 +54,24 @@ const App = () => {
 
   const downloadImage = async () => {
     const calendar = document.getElementById("calendar-container");
+
     if (!calendar) {
-      alert("Calendar not found. Please wait for calendar to load.");
+      alert("Calendar not found!");
       return;
     }
 
-    try {
-      const canvas = await html2canvas(calendar, {
-        backgroundColor: theme === 'dark' ? '#1a1a1a' : '#ffffff',
-        scale: 2,
-        useCORS: true,
-        allowTaint: true
-      });
-      
-      canvas.toBlob((blob) => {
-        const link = document.createElement("a");
-        link.download = `UTHM-Calendar-${activeSem || 'Full'}-${new Date().toISOString().split('T')[0]}.png`;
-        link.href = URL.createObjectURL(blob);
-        link.click();
-        URL.revokeObjectURL(link.href);
-      }, 'image/png');
-    } catch (error) {
-      console.error('Download error:', error);
-      alert('Download failed. Please try again.');
-    }
+    const canvas = await html2canvas(calendar, {
+      scale: 2,
+      useCORS: true
+    });
+
+    const link = document.createElement("a");
+    link.download = "UTHM_Calendar.png";
+    link.href = canvas.toDataURL("image/png");
+    link.click();
   };
 
-  const isJohorWeekend = (day) => day === 5 || day === 6;
+  const isWeekend = (day) => day === 0 || day === 6;
 
   const toggleTheme = () => setTheme(theme === 'dark' ? 'light' : 'dark');
 
@@ -83,9 +81,32 @@ const App = () => {
     window.open(`https://wa.me/?text=${encodeURIComponent(message + " " + url)}`, '_blank');
   };
 
-  const toggleDevMode = () => {
-    setIsDevMode(!isDevMode);
-  };
+  const downloadICS = () => {
+    let icsContent = `BEGIN:VCALENDAR
+    VERSION:2.0
+    CALSCALE:GREGORIAN
+    `;
+
+      uthmEvents.forEach(event => {
+        const start = event.start.replace(/-/g, "");
+        const end = event.end
+          ? event.end.replace(/-/g, "")
+          : start;
+
+        icsContent += `
+    BEGIN:VEVENT
+    SUMMARY:${event.title}
+    DTSTART:${start}
+    DTEND:${end}
+    END:VEVENT
+    `;
+      });
+
+      icsContent += "END:VCALENDAR";
+
+      const blob = new Blob([icsContent], { type: "text/calendar;charset=utf-8" });
+      saveAs(blob, "UTHM_Calendar.ics");
+    };
 
   const handleFeedbackSubmit = async () => {
     const now = Date.now();
@@ -101,11 +122,17 @@ const App = () => {
     }
 
     try {
+      console.log('Submitting feedback...'); // Debug log
+      
+      // Submit to Firestore
       const docRef = await addDoc(collection(db, "feedback"), {
         message: feedbackInput.trim(),
         createdAt: new Date(),
       });
+      
+      console.log('Feedback submitted with ID:', docRef.id); // Debug log
 
+      // Optimistically update UI
       const newFeedback = {
         id: docRef.id,
         message: feedbackInput.trim(),
@@ -117,6 +144,7 @@ const App = () => {
       setLastSubmitTime(now);
       setFeedbackModal(false);
       alert("✅ Feedback received!");
+
     } catch (err) {
       console.error("Error submitting feedback:", err);
       alert(`❌ Failed to submit feedback: ${err.message}`);
@@ -133,6 +161,7 @@ const App = () => {
     document.body.removeChild(link);
   };
 
+  // Filter events by category
   const filteredEvents = uthmEvents.filter(ev =>
     (activeFilter === 'all' || ev.extendedProps.category === activeFilter) &&
     (activeSem === 'all' || ev.extendedProps.semester === activeSem)
@@ -162,7 +191,7 @@ const App = () => {
       tiles.push(
         <div
           key={d}
-          className={`tile ${isJohorWeekend(dateObj.getDay()) ? 'weekend' : ''} ${events.length > 0 ? 'has-events' : ''}`}
+          className={`tile ${isWeekend(dateObj.getDay()) ? 'weekend' : ''}`}
           onMouseMove={(e) => {
             if (events.length > 0) {
               setCursor(prev => ({
@@ -205,11 +234,13 @@ const App = () => {
         <h3 className="month-title">
           {new Date(year, month).toLocaleString('ms-MY', { month: 'long' })} {year}
         </h3>
+
         <div className="weekday-row">
           {['Mon','Tue','Wed','Thu','Fri','Sat','Sun'].map(d => (
             <div key={d}>{d}</div>
           ))}
         </div>
+
         <div className="days-grid">{tiles}</div>
       </div>
     );
@@ -231,23 +262,20 @@ const App = () => {
         <button className="theme-toggle" onClick={toggleTheme}>
           {theme === 'dark' ? '☀ Light' : '🌙 Dark'}
         </button>
-        {isDevMode && (
-          <button className="dev-toggle" onClick={toggleDevMode}>
-            🔧 Dev
-          </button>
-        )}
       </div>
 
       {/* CALENDAR / LIST TOGGLE TOP RIGHT */}
       <div className="top-right-toggle">
         <div className="segmented-control advanced">
           <div className={`slider ${viewMode}`}></div>
+
           <button
             className={viewMode === 'calendar' ? 'active' : ''}
             onClick={() => setViewMode('calendar')}
           >
             <span>📅</span> Calendar
           </button>
+
           <button
             className={viewMode === 'list' ? 'active' : ''}
             onClick={() => setViewMode('list')}
@@ -266,6 +294,7 @@ const App = () => {
           <span className="pill-text">Cuti?</span>
         </h1>
 
+        {/* SEMESTER TOGGLE CENTERED */}
         <div className="toggle-group sem-toggle advanced">
           <button className={activeSem === 'khas' ? 'active' : ''} onClick={() => setActiveSem('khas')}>
             Sem Khas
@@ -281,6 +310,7 @@ const App = () => {
           </button>
         </div>
 
+        {/* LEGEND ABOVE CALENDAR */}
         <div className="legend legend-top">
           <div><span className="dot lecture" /> Lecture</div>
           <div><span className="dot exam" /> Examination</div>
@@ -290,29 +320,42 @@ const App = () => {
         </div>
       </header>
 
-      {/* ADD ID FOR DOWNLOAD */}
-      <div className="calendar-wrapper" id="calendar-container" key={activeSem}>
-        <div className="filter-bar">
-          {['all', 'lecture', 'exam', 'break', 'registration', 'holiday'].map(f => (
-            <button
-              key={f}
-              className={`${f} ${activeFilter === f ? 'active' : ''}`}
-              onClick={() => setActiveFilter(f)}
-            >
-              {f.toUpperCase()}
-            </button>
-          ))}
-        </div>
-
+      <div id="calendar-container" className="calendar-wrapper" key={activeSem}>
+        {/* FILTER */}
+            <div className="filter-bar">
+              {['all', 'lecture', 'exam', 'break', 'registration', 'holiday'].map(f => (
+                <button
+                  key={f}
+                  className={`${f} ${activeFilter === f ? 'active' : ''}`}
+                  onClick={() => setActiveFilter(f)}
+                >
+                  {f.toUpperCase()}
+                </button>
+              ))}
+            </div>
+        {/* CALENDAR VIEW */}
         {viewMode === 'calendar' ? (
           <div className="calendar-gallery">
-            {activeSem === 'khas' && [6, 7, 8].map(m => renderMonth(m, 2025))}
-            {activeSem === 'sem1' && [9, 10, 11, 0, 1].map(m => renderMonth(m, m >= 9 ? 2025 : 2026))}
-            {activeSem === 'sem2' && [2, 3, 4, 5, 6].map(m => renderMonth(m, 2026))}
-            {activeSem === 'sem3' && [6, 7, 8].map(m => renderMonth(m, 2026))}
+            {activeSem === 'khas' && (
+              [6, 7, 8].map(m => renderMonth(m, 2025)) // Jul–Sep 2025
+            )}
+
+            {activeSem === 'sem1' && (
+              [9, 10, 11, 0, 1].map(m => renderMonth(m, m >= 9 ? 2025 : 2026))
+            )}
+
+            {activeSem === 'sem2' && (
+              [2, 3, 4, 5, 6].map(m => renderMonth(m, 2026))
+            )}
+
+            {activeSem === 'sem3' && (
+              [6, 7, 8].map(m => renderMonth(m, 2026)) // Jul–Sep 2026
+            )}
           </div>
         ) : (
-          <div className="list-view enhanced">
+          /* LIST VIEW */
+          <div className="list-view">
+            {/* GROUP BY MONTH */}
             {Object.entries(
               filteredEvents.reduce((acc, ev) => {
                 const date = new Date(ev.start);
@@ -322,149 +365,126 @@ const App = () => {
                 return acc;
               }, {})
             ).map(([month, events]) => (
-              <div key={month} className="month-section">
-                <div className="list-month-header">
-                  <h2>{month}</h2>
-                  <span className="event-count">{events.length} events</span>
-                </div>
-                <div className="events-grid">
-                  {events.map((ev, i) => {
-                    const date = new Date(ev.start);
-                    const day = date.toLocaleString('en-US', { weekday: 'short' });
-                    const dateText = date.toLocaleString('en-US', { day: 'numeric', month: 'short' });
-                    const endDate = ev.end
-                      ? new Date(ev.end).toLocaleString('en-US', { day: 'numeric', month: 'short' })
-                      : null;
-                    return (
-                      <div key={i} className="list-item enhanced">
-                        <div className="list-date-circle">
-                          <div className="date-day">{day}</div>
-                          <div className="date-num">{date.getDate()}</div>
-                        </div>
-                        <div className="list-content enhanced">
-                          <div className={`list-dot ${ev.extendedProps.category}`} />
-                          <div className="list-details">
-                            <div className="list-title">{ev.title}</div>
-                            <div className="list-range">
-                              {endDate ? `${dateText} - ${endDate}` : dateText}
-                            </div>
-                            <div className={`list-category ${ev.extendedProps.category}`}>
-                              {ev.extendedProps.category.toUpperCase()}
-                            </div>
-                          </div>
+              <div key={month}>
+                <div className="list-month sticky">{month}</div>
+                {events.map((ev, i) => {
+                  const date = new Date(ev.start);
+                  const day = date.toLocaleString('en-US', { weekday: 'short' });
+                  const dateText = date.toLocaleString('en-US', { day: 'numeric', month: 'short' });
+                  const endDate = ev.end
+                    ? new Date(ev.end).toLocaleString('en-US', { day: 'numeric', month: 'short' })
+                    : null;
+                  return (
+                    <div key={i} className="list-item modern">
+                      <div className="list-date">
+                        <div>{day}</div>
+                        <div>{dateText}</div>
+                      </div>
+                      <div className="list-row">
+                        <div className={`list-dot ${ev.extendedProps.category}`} />
+                        <div className="list-content">
+                          <div className="list-badge">All Students</div>
+                          <div className="list-title">{ev.title}</div>
+                          <div className="list-range">{endDate ? `${dateText} - ${endDate}` : dateText}</div>
                         </div>
                       </div>
-                    );
-                  })}
-                </div>
+                    </div>
+                  );
+                })}
               </div>
             ))}
           </div>
         )}
-      </div>
 
-      {/* ENHANCED FLOATING BUTTONS */}
-      <div className="floating-action-buttons">
-        <button
-          className="fab whatsapp ripple"
-          onClick={handleWhatsAppShare}
-          title="Share on WhatsApp"
-        >
-          <FaWhatsapp />
-          <span className="fab-label">Share</span>
-        </button>
-
-        <div className="fab download-container">
+        {/* FLOAT BUTTONS LEFT BOTTOM */}
+        <div className="floating-buttons modern">
           <button
-            className="fab download ripple"
+            className="floating-btn whatsapp"
+            onClick={handleWhatsAppShare}
+            data-label="Share"
+          >
+            <FaWhatsapp />
+          </button>
+
+          <button
+            className="floating-btn download"
             onClick={() => setShowDownloadMenu(prev => !prev)}
-            title="Download"
+            data-label="Download"
           >
             <FaDownload />
-            <span className="fab-label">Download</span>
           </button>
           {showDownloadMenu && (
-            <div className="download-menu enhanced">
-              <button className="menu-item ripple" onClick={downloadImage}>
-                📸 Screenshot Calendar
-              </button>
-              <button className="menu-item ripple" onClick={handleDownload}>
-                📄 Official PDF
-              </button>
-              <div className="menu-divider"></div>
-              <button className="menu-close ripple" onClick={() => setShowDownloadMenu(false)}>
-                ✕ Close
-              </button>
+            <div className="download-menu">
+              <button onClick={downloadImage}>Download as Image</button>
+              <button onClick={handleDownload}>Download PDF</button>
             </div>
           )}
-        </div>
 
-        <button
-          className="fab feedback ripple"
-          onClick={() => setFeedbackModal(true)}
-          title="Feedback"
-        >
-          <FaComment />
-          <span className="fab-label">Feedback</span>
-        </button>
-      </div>
+          <button
+            className="floating-btn feedback"
+            onClick={() => setFeedbackModal(true)}
+            data-label="Feedback"
+          >
+            <FaComment />
+          </button>
+          {process.env.NODE_ENV === "development" && (
+            <div className="feedback-section">
+            <h3>User Feedback</h3>
 
-      {/* DEV ONLY FEEDBACK SECTION */}
-      {isDevMode && (
-        <div className="dev-panel">
-          <div className="dev-panel-header">
-            <h3>👨‍💻 Dev Panel</h3>
-            <button onClick={toggleDevMode}>Close</button>
-          </div>
-          <div className="feedback-section">
-            <h4>Recent Feedback ({feedbackList.length})</h4>
-            {feedbackList.slice(0, 5).map((fb, index) => (
-              <div key={fb.id || index} className="feedback-card">
-                <div className="feedback-message">{fb.message}</div>
-                <div className="feedback-time">
-                  {fb.createdAt ? new Date(fb.createdAt.seconds * 1000).toLocaleString() : 'Just now'}
-                </div>
+            {feedbackList.map((fb, index) => (
+              <div key={index} className="feedback-card">
+                {fb.message}
               </div>
             ))}
           </div>
+          )}
         </div>
-      )}
 
-      {/* POSTER MODAL */}
-      {posterModal && (
-        <div className="modal-overlay" onClick={() => setPosterModal(false)}>
-          <div className="modal" onClick={e => e.stopPropagation()}>
-            <iframe
-              src="https://amo.uthm.edu.my/images/USPG/Kalendar_Akaademik_2025/Kalendar_Akademik_BM-01.pdf"
-              className="poster-frame"
-              title="UTHM Academic Calendar 2025/2026"
-            />
-            <button className="modal-close" onClick={() => setPosterModal(false)}>Close</button>
+        {/* POSTER MODAL */}
+        {posterModal && (
+          <div className="modal-overlay" onClick={() => setPosterModal(false)}>
+            <div className="modal" onClick={e => e.stopPropagation()}>
+              <iframe
+                src="https://amo.uthm.edu.my/images/USPG/Kalendar_Akaademik_2025/Kalendar_Akademik_BM-01.pdf"
+                className="poster-frame"
+                title="UTHM Academic Calendar 2025/2026"
+              />
+              <button onClick={() => setPosterModal(false)}>Close</button>
+            </div>
           </div>
-        </div>
-      )}
+        )}
 
-      {/* FEEDBACK MODAL */}
-      {feedbackModal && (
+        {/* FEEDBACK MODAL */}
+        {feedbackModal && (
         <div className="modal-overlay" onClick={() => setFeedbackModal(false)}>
-          <div className="modal feedback-modal" onClick={e => e.stopPropagation()}>
-            <h3>💬 Send Feedback</h3>
+          <div className="modal" onClick={e => e.stopPropagation()}>
+            <h3>Write Your Feedback</h3>
             <textarea
               value={feedbackInput}
               onChange={e => setFeedbackInput(e.target.value)}
-              placeholder="What do you think about this calendar? Any suggestions?"
+              placeholder="Write your feedback..."
               maxLength={300}
-              rows={4}
             />
             <div className="char-count">{feedbackInput.length}/300</div>
             <div className="modal-buttons">
-              <button className="btn-primary" onClick={handleFeedbackSubmit}>Send Feedback</button>
-              <button className="btn-secondary" onClick={() => setFeedbackModal(false)}>Cancel</button>
+              <button onClick={handleFeedbackSubmit}>Submit</button>
+              <button onClick={() => setFeedbackModal(false)}>Cancel</button>
             </div>
+
+            <h3>User Feedback</h3>
+            {feedbackList.length === 0 ? (
+              <p>No feedback yet.</p>
+            ) : (
+              feedbackList.map((fb, i) => (
+                <div key={i} className="feedback-card">
+                  {fb.message}
+                </div>
+              ))
+            )}
           </div>
         </div>
       )}
-
+      </div>
       <div
         className={`cursor-glow ${cursor.type}`}
         style={{
