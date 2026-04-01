@@ -6,19 +6,9 @@ import html2canvas from "html2canvas";
 
 // Firebase imports
 import { getFirestore, collection, addDoc, getDocs } from "firebase/firestore";
-
-import './App.css';
 import { db } from "./firebase";
 
-//firebase config
-const firebaseConfig = {
-  apiKey: process.env.REACT_APP_FIREBASE_API_KEY,
-  authDomain: process.env.REACT_APP_FIREBASE_AUTH_DOMAIN,
-  projectId: process.env.REACT_APP_FIREBASE_PROJECT_ID,
-  storageBucket: process.env.REACT_APP_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: process.env.REACT_APP_FIREBASE_MESSAGING_SENDER_ID,
-  appId: process.env.REACT_APP_FIREBASE_APP_ID,
-};
+import './App.css';
 
 const App = () => {
   const [activeSem, setActiveSem] = useState('all');
@@ -28,6 +18,7 @@ const App = () => {
   const [feedbackModal, setFeedbackModal] = useState(false);
   const [feedbackInput, setFeedbackInput] = useState('');
   const [activeFilter, setActiveFilter] = useState('all');
+  const [lastSubmitTime, setLastSubmitTime] = useState(0);
   const [cursor, setCursor] = useState({
     x: 0,
     y: 0,
@@ -39,12 +30,17 @@ const App = () => {
 
   useEffect(() => {
     const fetchFeedback = async () => {
-      const data = await getDocs(collection(db, "feedback"));
-      const sorted = data.docs
-        .map(doc => doc.data())
-        .sort((a, b) => b.createdAt?.seconds - a.createdAt?.seconds);
-
-      setFeedbackList(sorted);
+      try {
+        console.log('Fetching feedback...'); // Debug log
+        const data = await getDocs(collection(db, "feedback"));
+        const sorted = data.docs
+          .map(doc => ({ id: doc.id, ...doc.data() }))
+          .sort((a, b) => b.createdAt?.seconds - a.createdAt?.seconds);
+        setFeedbackList(sorted);
+        console.log('Feedback fetched:', sorted); // Debug log
+      } catch (error) {
+        console.error('Error fetching feedback:', error);
+      }
     };
     fetchFeedback();
   }, []);
@@ -109,8 +105,6 @@ const App = () => {
     });
   };
 
-  const [lastSubmitTime, setLastSubmitTime] = useState(0);
-
   const handleFeedbackSubmit = async () => {
     const now = Date.now();
 
@@ -125,31 +119,32 @@ const App = () => {
     }
 
     try {
+      console.log('Submitting feedback...'); // Debug log
+      
       // Submit to Firestore
-      await addDoc(collection(db, "feedback"), {
+      const docRef = await addDoc(collection(db, "feedback"), {
         message: feedbackInput.trim(),
         createdAt: new Date(),
       });
+      
+      console.log('Feedback submitted with ID:', docRef.id); // Debug log
 
-      // Update local feedback list immediately
-      setFeedbackList(prev => [
-        ...prev,
-        { message: feedbackInput.trim(), createdAt: new Date() }
-      ]);
-
-      // Clear input and update last submit time
+      // Optimistically update UI
+      const newFeedback = {
+        id: docRef.id,
+        message: feedbackInput.trim(),
+        createdAt: new Date()
+      };
+      
+      setFeedbackList(prev => [newFeedback, ...prev]);
       setFeedbackInput('');
       setLastSubmitTime(now);
-
       setFeedbackModal(false);
       alert("✅ Feedback received!");
 
-      const updated = await getDocs(collection(db, "feedback"));
-      setFeedbackList(updated.docs.map(doc => doc.data()));
-
     } catch (err) {
       console.error("Error submitting feedback:", err);
-      alert("❌ Failed to submit feedback.");
+      alert(`❌ Failed to submit feedback: ${err.message}`);
     }
   };
 
@@ -464,7 +459,9 @@ const App = () => {
               value={feedbackInput}
               onChange={e => setFeedbackInput(e.target.value)}
               placeholder="Write your feedback..."
+              maxLength={300}
             />
+            <div className="char-count">{feedbackInput.length}/300</div>
             <div className="modal-buttons">
               <button onClick={handleFeedbackSubmit}>Submit</button>
               <button onClick={() => setFeedbackModal(false)}>Cancel</button>
