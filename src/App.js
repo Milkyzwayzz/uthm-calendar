@@ -5,7 +5,7 @@ import { saveAs } from "file-saver";
 import html2canvas from "html2canvas";
 
 // Firebase imports
-import { getFirestore, collection, addDoc, getDocs } from "firebase/firestore";
+import { collection, addDoc, getDocs } from "firebase/firestore";
 import { db } from "./firebase";
 
 import './App.css';
@@ -92,18 +92,6 @@ const App = () => {
       const blob = new Blob([icsContent], { type: "text/calendar;charset=utf-8" });
       saveAs(blob, "UTHM_Calendar.ics");
     };
-
-  const submitFeedback = async (text) => {
-    if (!text.trim() || text.length > 300) {
-      alert("Feedback must be 1–300 characters");
-      return;
-    }
-
-    await addDoc(collection(db, "feedback"), {
-      message: text.trim(),
-      createdAt: new Date(),
-    });
-  };
 
   const handleFeedbackSubmit = async () => {
     const now = Date.now();
