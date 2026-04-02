@@ -3,6 +3,7 @@ import { uthmEvents } from './calendarData';
 import { FaDownload, FaWhatsapp, FaComment } from 'react-icons/fa';
 import { saveAs } from "file-saver";
 import html2canvas from "html2canvas";
+import { serverTimestamp } from "firebase/firestore";
 
 // Firebase imports
 import { collection, addDoc, getDocs } from "firebase/firestore";
@@ -34,7 +35,7 @@ const App = () => {
 
   const [feedbackList, setFeedbackList] = useState([]);
   const [showDownloadMenu, setShowDownloadMenu] = useState(false);
-  const isDev = process.env.NODE_ENV === "development";
+  const SHOW_FEEDBACK = false;
 
   useEffect(() => {
     const fetchFeedback = async () => {
@@ -44,9 +45,14 @@ const App = () => {
         const sorted = data.docs
           .map(doc => ({ id: doc.id, ...doc.data() }))
           .sort((a, b) => {
-            const aTime = a.createdAt?.seconds || a.createdAt?.getTime?.() || 0;
-            const bTime = b.createdAt?.seconds || b.createdAt?.getTime?.() || 0;
-            return bTime - aTime;
+            const getTime = (val) => {
+              if (!val) return 0;
+              if (val.seconds) return val.seconds; // Firestore Timestamp
+              if (val instanceof Date) return val.getTime(); // JS Date
+              return 0;
+            };
+
+            return getTime(b.createdAt?.seconds - a.createdAt?.seconds);
           });
         setFeedbackList(sorted);
         console.log('Feedback fetched:', sorted); // Debug log
@@ -58,12 +64,10 @@ const App = () => {
   }, []);
 
   const downloadImage = async () => {
-    const calendar = document.getElementById("calendar-container");
+    if (typeof window === "undefined") return;
 
-    if (!calendar) {
-      alert("Calendar not found!");
-      return;
-    }
+    const calendar = document.getElementById("calendar-container");
+    if (!calendar) return;
 
     const canvas = await html2canvas(calendar, {
       scale: 2,
@@ -131,7 +135,7 @@ const App = () => {
       // Submit to Firestore
       const docRef = await addDoc(collection(db, "feedback"), {
         message: feedbackInput.trim(),
-        createdAt: new Date(),
+        createdAt: serverTimestamp(),
       });
       
       console.log('Feedback submitted with ID:', docRef.id); // Debug log
@@ -140,7 +144,7 @@ const App = () => {
       const newFeedback = {
         id: docRef.id,
         message: feedbackInput.trim(),
-        createdAt: new Date()
+        createdAt: serverTimestamp()
       };
       
       setFeedbackList(prev => [newFeedback, ...prev]);
@@ -431,16 +435,15 @@ const App = () => {
           >
             <FaComment />
           </button>
-          {isDev && (
+          {SHOW_FEEDBACK && (
             <div className="feedback-section">
-            <h3>User Feedback</h3>
-
-            {feedbackList.map((fb, index) => (
-              <div key={index} className="feedback-card">
-                {fb.message}
-              </div>
-            ))}
-          </div>
+              <h3>User Feedback</h3>
+              {feedbackList.map((fb, index) => (
+                <div key={index} className="feedback-card">
+                  {fb.message}
+                </div>
+              ))}
+            </div>
           )}
         </div>
 
