@@ -64,27 +64,23 @@ const App = () => {
   }, []);
 
   const downloadICS = () => {
-      console.log("ICS clicked"); // debug
+      if (!uthmEvents || uthmEvents.length === 0) return;
 
-      if (!uthmEvents || uthmEvents.length === 0) {
-        alert("No events available");
-        return;
-      }
-
+      // Ensure no leading spaces inside the backticks for the core tags
       let icsContent = `BEGIN:VCALENDAR
     VERSION:2.0
+    PRODID:-//UTHM//Calendar//EN
     CALSCALE:GREGORIAN
-    METHOD:PUBLISH
-    `;
+    METHOD:PUBLISH`;
 
       uthmEvents.forEach((event, index) => {
         const start = event.start.replace(/-/g, "") + "T000000";
         const end = (event.end ? event.end : event.start).replace(/-/g, "") + "T235959";
-
         const uid = `${Date.now()}-${index}@uthm-calendar`;
         const now = new Date().toISOString().replace(/[-:]/g, "").split(".")[0] + "Z";
 
-        icsContent += `BEGIN:VEVENT
+        icsContent += `
+    BEGIN:VEVENT
     UID:${uid}
     DTSTAMP:${now}
     DTSTART;TZID=Asia/Kuala_Lumpur:${start}
@@ -92,18 +88,14 @@ const App = () => {
     SUMMARY:${event.title}
     DESCRIPTION:UTHM Academic Calendar Event
     STATUS:CONFIRMED
-    END:VEVENT
-    `;
+    END:VEVENT`;
       });
 
-      icsContent += `END:VCALENDAR`;
+      icsContent += `\nEND:VCALENDAR`;
 
-      const blob = new Blob([icsContent], {
-        type: "text/calendar;charset=utf-8",
-      });
-
+      const blob = new Blob([icsContent], { type: "text/calendar;charset=utf-8" });
       saveAs(blob, "UTHM_Calendar.ics");
-  };
+    };
 
   const downloadImage = async () => {
     if (typeof window === "undefined") return;
@@ -432,7 +424,10 @@ const App = () => {
 
           <button
             className="floating-btn download"
-            onClick={() => setShowDownloadMenu(prev => !prev)}
+            onClick={(e) => {
+              e.stopPropagation(); // 👈 This is the critical missing piece
+              setShowDownloadMenu(prev => !prev);
+            }}
             data-label="Download"
           >
             <FaDownload />

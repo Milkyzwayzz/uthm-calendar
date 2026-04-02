@@ -5,10 +5,20 @@
   --purple: #8b5cf6;
   --red: #ef4444;
   --green: #10b981;
-  --orange: #f59e0b; /* registration */
+  --orange: #f59e0b;
   --text-muted: #71717a;
-  --highlight: #27272a; /* for "Bila" and "Cuti" background */
-  --holiday: #facc15; /* yellow for public holiday */
+  --highlight: #27272a;
+  --holiday: #facc15;
+}
+
+/* Single Light Mode Block */
+.app-light {
+  --bg: #f4f4f5;
+  --card: #ffffff;
+  --card-soft: rgba(0, 0, 0, 0.05);
+  --text-muted: #52525b;
+  --highlight: #e4e4e7;
+  color: #111827;
 }
 
 /* Body */
@@ -19,13 +29,37 @@ body {
   color: #fff;
 }
 
-/* LIGHT MODE */
-.app-light {
-  --bg: #f4f4f5;
-  --card: #fff;
-  --card-soft: rgba(0,0,0,0.05);
-  --text-muted: #52525b;
-  color: #000;
+#calendar-container {
+  animation: fadeScale 0.35s ease;
+  padding-bottom: 100px; /* Space for FABs */
+}
+
+.download-menu {
+  position: absolute;
+  bottom: 60px;
+  right: 0;
+  background: var(--card);
+  border: 1px solid var(--card-soft);
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  z-index: 1001;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+}
+
+.download-menu button {
+  background: transparent;
+  color: white;
+  padding: 12px 20px;
+  border: none;
+  text-align: left;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.download-menu button:hover {
+  background: var(--purple);
 }
 
 .calendar-dot {
@@ -82,9 +116,8 @@ body {
 }
 
 /* Day numbers color for light mode */
-.app-light .tile .day-num {
-  color: #000 !important;
-}
+.app-light .tile .day-num { color: #000 !important; }
+.app-light .month-card h3 { color: #000; }
 
 /* Horizontal legend for events (Lecture, Exam, Break, Registration) */
 .legend {
@@ -271,10 +304,6 @@ body {
   font-size: 1.5rem;
   text-align: center;
   margin-bottom: 12px;
-}
-
-.app-light .month-card h3 {
-  color: #000;
 }
 
 .month-card{
@@ -933,7 +962,6 @@ body {
 }
 
 .app-dark .month-card h3 { color: #fff; }
-.app-light .month-card h3 { color: #000; }
 
 .pill-text {
   padding: 6px 14px;
@@ -1436,6 +1464,7 @@ body {
 /* LIGHT MODE */
 .app-light .segmented-control.advanced {
   background: rgba(0,0,0,0.05);
+  color: #000;
 }
 
 .app-light .segmented-control.advanced button {
