@@ -34,6 +34,7 @@ const App = () => {
 
   const [feedbackList, setFeedbackList] = useState([]);
   const [showDownloadMenu, setShowDownloadMenu] = useState(false);
+  const isDev = process.env.NODE_ENV === "development";
 
   useEffect(() => {
     const fetchFeedback = async () => {
@@ -42,7 +43,11 @@ const App = () => {
         const data = await getDocs(collection(db, "feedback"));
         const sorted = data.docs
           .map(doc => ({ id: doc.id, ...doc.data() }))
-          .sort((a, b) => b.createdAt?.seconds - a.createdAt?.seconds);
+          .sort((a, b) => {
+            const aTime = a.createdAt?.seconds || a.createdAt?.getTime?.() || 0;
+            const bTime = b.createdAt?.seconds || b.createdAt?.getTime?.() || 0;
+            return bTime - aTime;
+          });
         setFeedbackList(sorted);
         console.log('Feedback fetched:', sorted); // Debug log
       } catch (error) {
@@ -82,7 +87,9 @@ const App = () => {
   };
 
   const downloadICS = () => {
-    let icsContent = `BEGIN:VCALENDAR VERSION:2.0 CALSCALE:GREGORIAN`;
+    let icsContent = `BEGIN:VCALENDAR
+    VERSION:2.0
+    CALSCALE:GREGORIAN`;
 
       uthmEvents.forEach(event => {
         const start = event.start.replace(/-/g, "");
@@ -424,7 +431,7 @@ const App = () => {
           >
             <FaComment />
           </button>
-          {process.env.NODE_ENV === "development" && (
+          {isDev && (
             <div className="feedback-section">
             <h3>User Feedback</h3>
 
