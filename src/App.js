@@ -82,10 +82,7 @@ const App = () => {
   };
 
   const downloadICS = () => {
-    let icsContent = `BEGIN:VCALENDAR
-    VERSION:2.0
-    CALSCALE:GREGORIAN
-    `;
+    let icsContent = `BEGIN:VCALENDAR VERSION:2.0 CALSCALE:GREGORIAN`;
 
       uthmEvents.forEach(event => {
         const start = event.start.replace(/-/g, "");
@@ -94,12 +91,12 @@ const App = () => {
           : start;
 
         icsContent += `
-    BEGIN:VEVENT
-    SUMMARY:${event.title}
-    DTSTART:${start}
-    DTEND:${end}
-    END:VEVENT
-    `;
+          BEGIN:VEVENT
+          SUMMARY:${event.title}
+          DTSTART:${start}
+          DTEND:${end}
+          END:VEVENT
+          `;
       });
 
       icsContent += "END:VCALENDAR";
