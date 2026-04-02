@@ -47,12 +47,12 @@ const App = () => {
           .sort((a, b) => {
             const getTime = (val) => {
               if (!val) return 0;
-              if (val.seconds) return val.seconds; // Firestore Timestamp
-              if (val instanceof Date) return val.getTime(); // JS Date
+              if (val.seconds) return val.seconds * 1000; // Firestore Timestamp
+              if (val instanceof Date) return val.getTime();
               return 0;
             };
 
-            return getTime(b.createdAt?.seconds - a.createdAt?.seconds);
+            return getTime(b.createdAt) - getTime(a.createdAt);
           });
         setFeedbackList(sorted);
         console.log('Feedback fetched:', sorted); // Debug log
@@ -64,6 +64,13 @@ const App = () => {
   }, []);
 
   const downloadICS = () => {
+      console.log("ICS clicked"); // debug
+
+      if (!uthmEvents || uthmEvents.length === 0) {
+        alert("No events available");
+        return;
+      }
+
       let icsContent = `BEGIN:VCALENDAR
     VERSION:2.0
     CALSCALE:GREGORIAN
@@ -82,7 +89,6 @@ const App = () => {
     DTSTAMP:${now}
     DTSTART;TZID=Asia/Kuala_Lumpur:${start}
     DTEND;TZID=Asia/Kuala_Lumpur:${end}
-    DTEND:${end}
     SUMMARY:${event.title}
     DESCRIPTION:UTHM Academic Calendar Event
     STATUS:CONFIRMED
@@ -93,11 +99,11 @@ const App = () => {
       icsContent += `END:VCALENDAR`;
 
       const blob = new Blob([icsContent], {
-        type: "text/calendar;charset=utf-8"
+        type: "text/calendar;charset=utf-8",
       });
 
       saveAs(blob, "UTHM_Calendar.ics");
-    };
+  };
 
   const downloadImage = async () => {
     if (typeof window === "undefined") return;
