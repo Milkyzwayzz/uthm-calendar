@@ -63,6 +63,42 @@ const App = () => {
     fetchFeedback();
   }, []);
 
+  const downloadICS = () => {
+      let icsContent = `BEGIN:VCALENDAR
+    VERSION:2.0
+    CALSCALE:GREGORIAN
+    METHOD:PUBLISH
+    `;
+
+      uthmEvents.forEach((event, index) => {
+        const start = event.start.replace(/-/g, "") + "T000000";
+        const end = (event.end ? event.end : event.start).replace(/-/g, "") + "T235959";
+
+        const uid = `${Date.now()}-${index}@uthm-calendar`;
+        const now = new Date().toISOString().replace(/[-:]/g, "").split(".")[0] + "Z";
+
+        icsContent += `BEGIN:VEVENT
+    UID:${uid}
+    DTSTAMP:${now}
+    DTSTART;TZID=Asia/Kuala_Lumpur:${start}
+    DTEND;TZID=Asia/Kuala_Lumpur:${end}
+    DTEND:${end}
+    SUMMARY:${event.title}
+    DESCRIPTION:UTHM Academic Calendar Event
+    STATUS:CONFIRMED
+    END:VEVENT
+    `;
+      });
+
+      icsContent += `END:VCALENDAR`;
+
+      const blob = new Blob([icsContent], {
+        type: "text/calendar;charset=utf-8"
+      });
+
+      saveAs(blob, "UTHM_Calendar.ics");
+    };
+
   const downloadImage = async () => {
     if (typeof window === "undefined") return;
 
@@ -397,9 +433,12 @@ const App = () => {
           </button>
           {showDownloadMenu && (
             <div className="download-menu">
-              <button onClick={downloadImage}>Download as Image</button>
-              <button onClick={handleDownload}>Download PDF</button>
-            </div>
+            <button onClick={downloadImage}>Download as Image</button>
+            <button onClick={handleDownload}>Download PDF</button>
+            <button className="ics-btn" onClick={downloadICS}>
+              📅 Add to Calendar
+            </button>
+          </div>
           )}
 
           <button
