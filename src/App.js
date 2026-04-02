@@ -90,32 +90,6 @@ const App = () => {
     window.open(`https://wa.me/?text=${encodeURIComponent(message + " " + url)}`, '_blank');
   };
 
-  const downloadICS = () => {
-    let icsContent = `BEGIN:VCALENDAR
-    VERSION:2.0
-    CALSCALE:GREGORIAN`;
-
-      uthmEvents.forEach(event => {
-        const start = event.start.replace(/-/g, "");
-        const end = event.end
-          ? event.end.replace(/-/g, "")
-          : start;
-
-        icsContent += `
-          BEGIN:VEVENT
-          SUMMARY:${event.title}
-          DTSTART:${start}
-          DTEND:${end}
-          END:VEVENT
-          `;
-      });
-
-      icsContent += "END:VCALENDAR";
-
-      const blob = new Blob([icsContent], { type: "text/calendar;charset=utf-8" });
-      saveAs(blob, "UTHM_Calendar.ics");
-    };
-
   const handleFeedbackSubmit = async () => {
     const now = Date.now();
 
